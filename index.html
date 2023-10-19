@@ -1,190 +1,240 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="img/logoberna.png"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="icon" type="image/png" href="img/logoberna.png"/>
 
     <script src="menu.js" defer></script>
     <title>Bernardo Azevedo - Portfólio</title>
 </head>
 <body>
-    <header>
-        <div class="interface">
-            <div class="logo">
-                <a href="#">
-                    <img src="img/logoberna.png" style="width: 100px; height: 100px;" alt="Logo Berna">
-                </a>
+
+<header>
+    <div class="interface">
+        <div class="logo">
+            <a href="#">
+                <img src="img/logoberna.png" style="width: 100px; height: 100px;" alt="Logo Berna">
+            </a>
+        </div>
+
+        <nav class="menu-desktop">
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#specialties">Specialties</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#portfolio">Projects</a></li>
+            </ul>
+        </nav>
+
+        <div class="btn-abrir-menu" id="btn-menu">
+            <i class="bi bi-list"></i>
+        </div>
+
+        <div class="menu-mobile" id="menu-mobile">
+            <div class="btn-fechar">
+                <i class="bi bi-x-lg"></i>
             </div>
 
-            <nav class="menu-desktop">
+            <nav>
                 <ul>
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#">Specialties</a></li>
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Projects</a></li>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#specialties">Specialties</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#portfolio">Projects</a></li>
                 </ul>
             </nav>
-
-            <div class="btn-contacto">
-                <a href="#">
-                    <button>Contact</button>
-                </a>
-            </div>
-
-            <div class="btn-abrir-menu" id="btn-menu">
-                <i class="bi bi-list"></i>
-            </div>
-
-            <div class="menu-mobile" id="menu-mobile">
-                <div class="btn-fechar">
-                    <i class="bi bi-x-lg"></i>
-                </div>
-
-                <nav>
-                    <ul>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">Specialties</a></li>
-                        <li><a href="#">About</a></li>
-                        <li><a href="#">Projects</a></li>
-                        <li><a href="#">Contact</a></li>
-                    </ul>
-                </nav>
-            </div>
-            <div class="overlay-menu" id=""></div>
         </div>
-    </header>
+        <div class="overlay-menu" id=""></div>
+    </div>
+</header>
 
-    <main>
-        <section class="topo-do-site">
-            <div class="interface">
-                <div class="flex">
-                    <div class="txt-topo-site">
-                        <h1>Bernardo Azevedo</h1>
-                        <h2>Full Stack Software Developer</h2>
-                        <div class="social-media">
-                            <a href="https://www.linkedin.com/in/bernardo-azevedo-3321aa173/">Linkedin</a>
-                            <a href="https://github.com/Berna58">Github</a>
-                        </div>
-                    </div>
-
-                    <div class="img-topo-site">
-                        <img src="img/logoberna.png" alt="">
-                    </div>
+<section id="home" class="topo-do-site">
+    <div class="interface">
+        <div class="flex">
+            <div class="txt-topo-site">
+                <h1><strong>Bernardo Azevedo</strong></h1>
+                <h2>Full Stack Software Developer</h2>
+                <div class="social-media">
+                    <a href="https://www.linkedin.com/in/bernardo-azevedo-3321aa173/">Linkedin</a>
+                    <a href="https://github.com/Berna58">Github</a>
                 </div>
             </div>
-        </section><!--topo-do-site-->
 
-        <section class="especialidades">
-            <div class="interface">
-                <h2 class="titulo">MY SPECIALTIES</h2>
-                <div class="flex">
-                    <div class="especialidades-box">
-                        <i class="bi bi-code-square"></i>
-                        <h3>Website</h3>
-                        <p>Lorem ipsum dolor sit amet consectetur</p>
-                    </div><!--especialidades box-->
-                    <div class="especialidades-box">
-                        <i class="bi bi-cart"></i>
-                        <h3>Online store</h3>
-                        <p>Lorem ipsum dolor sit amet consectetur</p>
-                    </div><!--especialidades box-->
-                    <div class="especialidades-box">
-                        <i class="bi bi-wordpress"></i>
-                        <h3>Blog</h3>
-                        <p>Lorem ipsum dolor sit amet consectetur</p>
-                    </div><!--especialidades box-->
-                </div><!--flex-->
-            </div><!--interface-->
-        </section><!--especialidades-->
-
-        <section class="sobre">
-          <div class="interface">
-            <div class="flex">
-                <div class="img-sobre">
-                    <img src="img/foto.png" alt="">
-                </div>
-
-                <div class="txt-sobre">
-                    <h2>Hello, <span>I´m Bernardo Azevedo.</span></h2>
-                    <p>A young enthusiast of technology and innovation with 21 years old, with a degree in Computer Graphics and Multimedia
-                        Engineering, focusing on Full Stack Development. </p>
-                    <p>My areas of interest are centered around the world of web development, especially in Front-End, where i can create attractive and intuitive
-                        interfaces for users. Additionally, i have solid knowledge in Back-End, enabling me to develop comprehensive and efficient solutions.</p>
-                    <p>I am driven by a constant quest for improvement and always open to new challenges. I value teamwork, where my communication and collaboration skills
-                        are essential for achieving outstanding results in dynamic professional environments.
-                    </p>
-                    <div class="btn-social">
-                        <a href="https://www.instagram.com/bernaazevedo58/"><button><i class="bi bi-instagram"></i></button></a>
-                        <a href="https://www.facebook.com/BernaAzevedo58/"><button><i class="bi bi-facebook"></i></i></button></a>
-                    </div>
-                </div>
+            <div class="img-topo-site">
+                <img src="img/logoberna.png" alt="">
             </div>
-          </div><!--interface-->
-        </section><!--sobre-->
+        </div>
+    </div>
+</section>
 
-        <section class="portfolio">
-            <div class="interfa">
-                <h2 class="titulo">MY PORTFOLIO.</h2>
-                <div class="flex">
-                    <div class="img-port" style="background-image: url(img/imagem.jpg);">
-                        <div class="overlay">
-                            Project 1
-                        </div>
-                    </div>
-                    <div class="img-port" style="background-image: url(img/imagem.jpg);">
-                        <div class="overlay">
-                            Project 2
-                        </div>
-                    </div>
-                    <div class="img-port" style="background-image: url(img/imagem.jpg);">
-                        <div class="overlay">
-                            Project 3
-                        </div>
-                    </div>
+<section id="specialties" class="especialidades">
+    <div class="interface">
+        <h2 class="titulo">MY SPECIALTIES.</h2>
+        <div class="flex">
+            <div class="especialidades-box">
+                <i class="bi bi-pencil-square"></i>
+                <h3>Web Design</h3>
+            </div>
+            <div class="especialidades-box">
+                <i class="bi bi-code-square"></i>
+                <h3>Web Development</h3>
+            </div>
+            <div class="especialidades-box">
+                <i class="bi bi-pencil-fill"></i>
+                <h3>Graphic Design</h3>
+            </div>
+            <div class="especialidades-box">
+                <i class="bi bi-person-fill"></i>
+                <h3>UI/UX Design</h3>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section id="about" class="py-5 bg-light sobre" style="padding-top: 130px !important;">
+    <div class="interface">
+        <div class="flex">
+            <div class="img-sobre">
+                <img src="img/profile.jpg" style="border-radius: 50%;">
+            </div>
+
+            <div class="txt-sobre">
+                <h2>Hello, <span>I´m Bernardo Azevedo.</span></h2>
+                <p>A young enthusiast of technology and innovation with 21 years old, with a degree in Computer Graphics and Multimedia
+                    Engineering, focusing on Full Stack Development. </p>
+                <p>My areas of interest are centered around the world of web development, especially in Front-End, where i can create attractive and intuitive
+                    interfaces for users. Additionally, i have solid knowledge in Back-End, enabling me to develop comprehensive and efficient solutions.</p>
+                <p>I am driven by a constant quest for improvement and always open to new challenges. I value teamwork, where my communication and collaboration skills
+                    are essential for achieving outstanding results in dynamic professional environments.
+                </p>
+                <div class="btn-social">
+                    <a href="https://www.instagram.com/bernaazevedo58/"><button><i class="bi bi-instagram" style="color: #fff;"></i></button></a>
+                    <a href="https://www.facebook.com/BernaAzevedo58/"><button><i class="bi bi-facebook" style="color: #fff;"></i></i></button></a>
                 </div>
             </div>
-        </section>
+        </div>
+    </div>
+</section>
 
-        <section class="formulario">
-            <div class="interface">
-                <h2 class="titulo">Get in touch.</h2>
-
-                <form action="">
-                    <input type="text" name="" id="" placeholder="Name" required>
-                    <input type="text" name="" id="" placeholder="Email" required>
-                    <input type="text" name="" id="" placeholder="Cell Phone" required>
-                    <textarea name="" id="" placeholder="Message" required></textarea>
-                    <div class="btn-enviar">
-                        <input type="submit" value="SEND">
-                    </div>
-                </form>
-            </div>
-        </section>
-    </main>
-
-    <footer>
+<section id="portfolio" class="portfolio" style="padding-top: 110px !important;">
+    <div class="container">
         <div class="interface">
-            <div class="line-footer">
-                <div class="flex">
-                    <div class="logo-footer">
-                        <img src="img/logoberna.png" style="width: 100px; height: 100px;">
-                    </div>
-                    <div class="btn-social">
-                        <a href="https://www.instagram.com/bernaazevedo58/"><button><i class="bi bi-instagram"></i></button></a>
-                        <a href="https://www.facebook.com/BernaAzevedo58/"><button><i class="bi bi-facebook"></i></i></button></a>
-                    </div>
+            <h2 class="titulo">MY PORTFOLIO.</h2>
+            <div class="flex">
+                <div class="img-port" style="background-image: url(img/layoutblog.png);">
+                    <a class="text-decoration-none card-link" data-toggle="modal" data-target="#modal1">
+                        <div class="overlay">
+                            Website
+                        </div>
+                    </a>
+                </div>
+                <div class="img-port" style="background-image: url(img/layoutblog.png);">
+                    <a class="text-decoration-none card-link" data-toggle="modal" data-target="#modal2">
+                        <div class="overlay">
+                            Game
+                        </div>
+                    </a>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
 
-            <div class="line-footer borda">
-                <p><i class="bi bi-envelope-fill"></i> <a href="mailto:bernardosilvaazevedo@gmail.com">bernardosilvaazevedo@gmail.com</a></p>
+<footer>
+    <div class="interface">
+        <div class="line-footer">
+            <div class="flex">
+                <div class="logo-footer">
+                    <img src="img/logoberna.png" style="width: 100px; height: 100px;">
+                </div>
+                <div class="btn-social">
+                    <a href="https://www.instagram.com/bernaazevedo58/"><button style="background-color: #fff;"><i class="bi bi-instagram" style="color: black;"></i></button></a>
+                    <a href="https://www.facebook.com/BernaAzevedo58/"><button style="background-color: #fff;"><i class="bi bi-facebook" style="color: black;"></i></button></a>
+                    <a href="https://github.com/Berna58"><button style="background-color: #fff;"><i class="bi bi-github" style="color: black;"></i></button></a>
+                    <a href="https://www.linkedin.com/in/bernardo-azevedo-3321aa173/"><button style="background-color: #fff;"><i class="bi bi-linkedin" style="color: black;"></i></button></a>
+                </div>
             </div>
         </div>
-    </footer>
 
-   
+        <div class="line-footer borda">
+            <p><i class="bi bi-envelope-fill"></i> <a href="mailto:bernardosilvaazevedo@gmail.com">bernardosilvaazevedo@gmail.com</a></p>
+        </div>
+    </div>
+</footer> 
+
+<div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Plataforma Gestão de Domínios</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" id="button2"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Conteúdo do modal aqui -->
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe width="1006" height="576" src="https://www.youtube.com/embed/lLViuZffA_I" title="Projeto Final | Plataforma de Gestão de Domínios | FTKode" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <!-- Adicione outras informações aqui -->
+                <div class="modal-body">
+                    <p>
+                
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Game SaveThePlanet</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" id="button2"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Conteúdo do modal aqui -->
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe width="1006" height="576" src="https://www.youtube.com/embed/JJ6mdDkmroA" title="Animação Eco-Escolas | Miguel Cruzeiro" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <!-- Adicione outras informações aqui -->
+                <div class="modal-body">
+                    <p></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#modal1').on('shown.bs.modal', function () {
+        $('#myInput').trigger('focus')
+    })
+    $('#modal2').on('shown.bs.modal', function () {
+        $('#myInput').trigger('focus')
+    })
+    $('#modal3').on('shown.bs.modal', function () {
+        $('#myInput').trigger('focus')
+    })
+</script>
+    
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
 </body>
 </html>
+

@@ -7,6 +7,44 @@
     font-family: 'Poppins', sans-serif;
 }
 
+.portfolio-card {
+    cursor: pointer;
+}
+#contact, #about, #portfolio {
+    min-height: 100vh;
+    padding-top: 80px;
+    padding-bottom: 80px;
+}
+
+/* Increase the size of icons */
+.fa-2x {
+    font-size: 2rem;
+}
+
+/* Style the Download CV button */
+.btn-primary {
+    margin-top: 20px;
+}
+.portfolio-card {
+    transition: transform 0.2s; /* Add a transition effect on the transform property */
+}
+
+.portfolio-card:hover {
+    transform: scale(1.05); /* Increase the scale (zoom in) on hover */
+}
+.text-decoration-none:hover {
+    color: #c0c0c0; /* Change to the color you prefer on hover */
+    transition: color 0.3s ease; /* Smooth transition effect */
+}
+.text-decoration-none {
+    color: white; /* Change to the color you prefer on hover */
+}
+
+html{
+    scroll-behavior: smooth;
+    scroll-padding: 5rem;
+}
+
 body {
     background-color: #000;
     height: 100vh;
@@ -230,19 +268,27 @@ section.especialidades .flex{
 
 }
 
+#button2
+{
+    background-color: transparent; /* Define o fundo como transparente */
+    border: none; /* Remove qualquer borda */
+    font-size: 1.5rem; /* Ajuste o tamanho do ícone conforme necessário */
+}
+
+
 /* SOBRE */
 
 section.sobre {
-    padding: 80px 4%;
+    padding: 80px 2%;
 }
 
 section.sobre .flex{
     align-items: center;
-    gap: 60px;
+    gap: 30px;
 }
 
 .sobre .txt-sobre{
-    color: #fff;
+    color: #000000;
 }
 
 .sobre .txt-sobre h2{
@@ -252,7 +298,7 @@ section.sobre .flex{
 }
 
 .sobre .txt-sobre h2 span{
-    color: #fff;
+    color: #000000;
     display: block;
 }
 
@@ -266,7 +312,7 @@ section.sobre .flex{
     height: 60px;
     border-radius: 50%;
     border: none;
-    background-color: #fff;
+    background-color: #000000;
     font-size: 22px;
     cursor: pointer;
     margin: 0 5px;
@@ -274,7 +320,7 @@ section.sobre .flex{
 }
 
 .btn-social button:hover{
-    box-shadow: 0px 0px 8px #fff;
+    box-shadow: 0px 0px 8px #000000;
     transform: scale(1.05);
 }
 
@@ -299,6 +345,7 @@ section.portfolio .flex{
     cursor: pointer;
     border-radius: 40px;
     position: relative;
+    border: 1px solid #ffffff;
 }
 
 .img-port:hover{
@@ -325,57 +372,6 @@ section.portfolio .flex{
 
 .overlay:hover{
     opacity: 1;
-}
-
-/* CONTACTO */
-
-section.formulario{
-    padding: 80px 4%;
-
-}
-
-form{
-    max-width: 500px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 40px;
-}
-
-form input, form textarea{
-    width: 100%;
-    background-color: #242424;
-    border: 0;
-    outline: 0;
-    padding: 20px 15px;
-    border-radius: 15px;
-    color: #fff;
-    font-size: 18px;
-}
-
-form textarea{
-    resize: none;
-    max-height: 200px
-}
-
-form .btn-enviar{
-    margin-top: 20px;
-    text-align: center;
-}
-
-form .btn-enviar input{
-    width: 120px;
-    background-color: #fff;
-    color: #000;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-form .btn-enviar input:hover{
-    box-shadow: 0px 0px 0px #fff;
-    transform: scale(1.05);
 }
 
 /* FOOTER */
