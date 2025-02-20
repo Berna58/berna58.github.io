@@ -1,46 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="img/logoberna.png"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="icon" type="image/png" href="favi.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <script src="menu.js" defer></script>
     <title>Bernardo Azevedo - Portfólio</title>
 </head>
+
 <body>
 
-<header>
-    <div class="interface">
-        <div class="logo">
-            <a href="#">
-                <img src="img/logoberna.png" style="width: 100px; height: 100px;" alt="Logo Berna">
-            </a>
-        </div>
-
-        <nav class="menu-desktop">
-            <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#specialties">Specialties</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#portfolio">Projects</a></li>
-            </ul>
-        </nav>
-
-        <div class="btn-abrir-menu" id="btn-menu">
-            <i class="bi bi-list"></i>
-        </div>
-
-        <div class="menu-mobile" id="menu-mobile">
-            <div class="btn-fechar">
-                <i class="bi bi-x-lg"></i>
+    <header>
+        <div class="interface">
+            <div class="logo">
+                <a href="#">
+                    <img src="img/logoberna.png" style="width: 100px; height: 100px;" alt="Logo Berna">
+                </a>
             </div>
 
-            <nav>
+            <nav class="menu-desktop">
                 <ul>
                     <li><a href="#home">Home</a></li>
                     <li><a href="#specialties">Specialties</a></li>
@@ -48,193 +33,619 @@
                     <li><a href="#portfolio">Projects</a></li>
                 </ul>
             </nav>
-        </div>
-        <div class="overlay-menu" id=""></div>
-    </div>
-</header>
 
-<section id="home" class="topo-do-site">
-    <div class="interface">
-        <div class="flex">
-            <div class="txt-topo-site">
-                <h1><strong>Bernardo Azevedo</strong></h1>
-                <h2>Full Stack Software Developer</h2>
-                <div class="social-media">
-                    <a href="https://www.linkedin.com/in/bernardo-azevedo-3321aa173/">Linkedin</a>
-                    <a href="https://github.com/Berna58">Github</a>
+            <div class="btn-abrir-menu" id="btn-menu">
+                <i class="bi bi-list"></i>
+            </div>
+
+            <div class="menu-mobile" id="menu-mobile">
+                <div class="btn-fechar">
+                    <i class="bi bi-x-lg"></i>
                 </div>
-            </div>
 
-            <div class="img-topo-site">
-                <img src="img/logoberna.png" alt="">
+                <nav>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#specialties">Specialties</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#portfolio">Projects</a></li>
+                    </ul>
+                </nav>
             </div>
+            <div class="overlay-menu" id=""></div>
         </div>
-    </div>
-</section>
+    </header>
 
-<section id="specialties" class="especialidades">
-    <div class="interface">
-        <h2 class="titulo">MY SPECIALTIES.</h2>
-        <div class="flex">
-            <div class="especialidades-box">
-                <i class="bi bi-pencil-square"></i>
-                <h3>Web Design</h3>
-            </div>
-            <div class="especialidades-box">
-                <i class="bi bi-code-square"></i>
-                <h3>Web Development</h3>
-            </div>
-            <div class="especialidades-box">
-                <i class="bi bi-pencil-fill"></i>
-                <h3>Graphic Design</h3>
-            </div>
-            <div class="especialidades-box">
-                <i class="bi bi-person-fill"></i>
-                <h3>UI/UX Design</h3>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-<section id="about" class="py-5 bg-light sobre" style="padding-top: 130px !important;">
-    <div class="interface">
-        <div class="flex">
-            <div class="img-sobre">
-                <img src="img/profile.jpg" style="border-radius: 50%;">
-            </div>
-
-            <div class="txt-sobre">
-                <h2>Hello, <span>I´m Bernardo Azevedo.</span></h2>
-                <p>A young enthusiast of technology and innovation with 23 years old, with a degree in Computer Graphics and Multimedia
-                    Engineering, focusing on Full Stack Development. </p>
-                <p>My areas of interest are centered around the world of web development, especially in Front-End, where i can create attractive and intuitive
-                    interfaces for users. Additionally, i have solid knowledge in Back-End, enabling me to develop comprehensive and efficient solutions.</p>
-                <p>I am driven by a constant quest for improvement and always open to new challenges. I value teamwork, where my communication and collaboration skills
-                    are essential for achieving outstanding results in dynamic professional environments.
-                </p>
-                <div class="btn-social">
-                    <a href="https://www.instagram.com/bernaazevedo58/"><button><i class="bi bi-instagram" style="color: #fff;"></i></button></a>
-                    <a href="https://www.facebook.com/BernaAzevedo58/"><button><i class="bi bi-facebook" style="color: #fff;"></i></i></button></a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section id="portfolio" class="portfolio" style="padding-top: 110px !important;">
-    <div class="container">
+    <section id="home" class="topo-do-site">
         <div class="interface">
-            <h2 class="titulo">MY PORTFOLIO.</h2>
             <div class="flex">
-                <div class="img-port" style="background-image: url(img/layoutblog.png);">
-                    <a class="text-decoration-none card-link" data-toggle="modal" data-target="#modal1">
-                        <div class="overlay">
-                            Website
-                        </div>
-                    </a>
+                <div class="txt-topo-site">
+                    <h1><strong>Bernardo Azevedo</strong></h1>
+                    <h2>Full Stack Software Developer</h2>
+                    <div class="btn-social mt-5">
+                        <a href="https://www.instagram.com/bernaazevedo58/"><button><i class="bi bi-instagram"
+                                    style="color: #000000;"></i></button></a>
+                        <a href="https://www.facebook.com/BernaAzevedo58/"><button><i class="bi bi-facebook"
+                                    style="color: #000000;"></i></i></button></a>
+                        <a href="https://github.com/Berna58"><button><i class="bi bi-github"
+                                    style="color: #000000;"></i></i></button></a>
+                        <a href="https://www.behance.net/bernardosi469a"><button><i class="bi bi-behance"
+                                    style="color: #000000;"></i></i></button></a>
+                    </div>
                 </div>
-                <div class="img-port" style="background-image: url(img/layoutblog.png);">
-                    <a class="text-decoration-none card-link" data-toggle="modal" data-target="#modal2">
-                        <div class="overlay">
-                            Game
-                        </div>
-                    </a>
+
+                <div class="img-topo-site">
+                    <img src="img/logoberna.png" alt="">
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<footer>
-    <div class="interface">
-        <div class="line-footer">
+    <section id="specialties" class="especialidades">
+        <div class="interface">
+            <h2 class="titulo">MY SPECIALTIES.</h2>
             <div class="flex">
-                <div class="logo-footer">
-                    <img src="img/logoberna.png" style="width: 100px; height: 100px;">
+                <div class="especialidades-box">
+                    <i class="bi bi-pencil-square"></i>
+                    <h3>Web Design</h3>
                 </div>
-                <div class="btn-social">
-                    <a href="https://www.instagram.com/bernaazevedo58/"><button style="background-color: #fff;"><i class="bi bi-instagram" style="color: black;"></i></button></a>
-                    <a href="https://www.facebook.com/BernaAzevedo58/"><button style="background-color: #fff;"><i class="bi bi-facebook" style="color: black;"></i></button></a>
-                    <a href="https://github.com/Berna58"><button style="background-color: #fff;"><i class="bi bi-github" style="color: black;"></i></button></a>
-                    <a href="https://www.linkedin.com/in/bernardo-azevedo-3321aa173/"><button style="background-color: #fff;"><i class="bi bi-linkedin" style="color: black;"></i></button></a>
+                <div class="especialidades-box">
+                    <i class="bi bi-code-square"></i>
+                    <h3>Web Development</h3>
+                </div>
+                <div class="especialidades-box">
+                    <i class="bi bi-pencil-fill"></i>
+                    <h3>Graphic Design</h3>
+                </div>
+                <div class="especialidades-box">
+                    <i class="bi bi-person-fill"></i>
+                    <h3>UI/UX Design</h3>
                 </div>
             </div>
         </div>
+    </section>
 
-        <div class="line-footer borda">
-            <p><i class="bi bi-envelope-fill"></i> <a href="mailto:bernardosilvaazevedo@gmail.com">bernardosilvaazevedo@gmail.com</a></p>
-        </div>
-    </div>
-</footer> 
 
-<div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Plataforma Gestão de Domínios</h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" id="button2"><i class="bi bi-x-lg"></i></button>
-            </div>
-            <div class="modal-body">
-                <!-- Conteúdo do modal aqui -->
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe width="1006" height="576" src="https://www.youtube.com/embed/lLViuZffA_I" title="Projeto Final | Plataforma de Gestão de Domínios | FTKode" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    <section id="sobre" class="py-5 bg-light sobre" style="padding-top: 130px !important;">
+        <div class="interface">
+            <div class="flex">
+                <div class="img-sobre">
+                    <img src="img/profile.jpg" style="border-radius: 50%;">
                 </div>
-                <!-- Adicione outras informações aqui -->
-                <div class="modal-body">
-                    <p>
-                
+
+                <div class="txt-sobre">
+                    <h2>Hello, <span>I´m Bernardo Azevedo.</span></h2>
+                    <p>A young enthusiast of technology and innovation with 23 years old, with a degree in Computer
+                        Graphics and Multimedia
+                        Engineering, focusing on Full Stack Development. </p>
+                    <p>My areas of interest are centered around the world of web development, especially in Front-End,
+                        where i can create attractive and intuitive
+                        interfaces for users. Additionally, i have solid knowledge in Back-End, enabling me to develop
+                        comprehensive and efficient solutions.</p>
+                    <p>I am driven by a constant quest for improvement and always open to new challenges. I value
+                        teamwork, where my communication and collaboration skills
+                        are essential for achieving outstanding results in dynamic professional environments.
                     </p>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <h3>Profile</h3>
+                    <p>I <i class="fa fa-heart"></i> programming and design.</p>
+                    <ul class="info-list">
+                        <li>
+                            <strong>Name:</strong>
+                            <span>Bernardo Azevedo</span>
+                        </li>
+                        <li>
+                            <strong>Birthday:</strong>
+                            <span>December 04, 2001</span>
+                        </li>
+                        <li>
+                            <strong>Position:</strong>
+                            <span>Full-Stack Developer, UI/UX Designer</span>
+                        </li>
+                        <li>
+                            <strong>Website:</strong>
+                            <span>berna58.github.io</span>
+                        </li>
+                        <li>
+                            <strong>Email:</strong>
+                            <span>bernardosilvaazevedo@gmail.com</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-md-6">
+                    <h3>Skills</h3>
+                    <p>My specialties</p>
+                    <h4 class="progress-title mt-5">Front-end</h4>
+                    <div class="progress berna">
+                        <div class="progress-bar" style="width:90%;">
+                            <div class="progress-value">90%</div>
+                        </div>
+                    </div>
+
+                    <h4 class="progress-title">BACK-END</h4>
+                    <div class="progress berna">
+                        <div class="progress-bar" style="width:70%;">
+                            <div class="progress-value">70%</div>
+                        </div>
+                    </div>
+
+                    <h4 class="progress-title">WEB</h4>
+                    <div class="progress berna">
+                        <div class="progress-bar" style="width:90%;">
+                            <div class="progress-value">90%</div>
+                        </div>
+                    </div>
+
+                    <h4 class="progress-title">MOBILE</h4>
+                    <div class="progress berna">
+                        <div class="progress-bar" style="width:40%;">
+                            <div class="progress-value">40%</div>
+                        </div>
+                    </div>
+
+                    <h4 class="progress-title">GRAPHIC DESIGN</h4>
+                    <div class="progress berna">
+                        <div class="progress-bar" style="width:87%;">
+                            <div class="progress-value">87%</div>
+                        </div>
+                    </div>
+
+                    <h4 class="progress-title">UI/UX</h4>
+                    <div class="progress berna">
+                        <div class="progress-bar" style="width:65%;">
+                            <div class="progress-value">65%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons-container">
+                <!-- <button class="btn-outline">GET IN TOUCH</button> -->
+                <a href="store/CV_BernardoAzevedo.pdf" class="btn-filled">DOWNLOAD CV</a>
+            </div>
+    </section>
+
+    <section id="resume" class="grey-section">
+
+        <div class="row section-intro">
+            <div class="col-12">
+                <h5>Resume</h5>
+                <h1>My qualifications</h1>
+
+                <p class="lead">A little about my career</p>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="modal fade" id="modal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Game SaveThePlanet</h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" id="button2"><i class="bi bi-x-lg"></i></button>
+        <div class="row resume-timeline">
+            <div class="col-12 resume-header">
+                <h2>Professional Experience</h2>
             </div>
-            <div class="modal-body">
-                <!-- Conteúdo do modal aqui -->
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe width="1006" height="576" src="https://www.youtube.com/embed/JJ6mdDkmroA" title="Animação Eco-Escolas | Miguel Cruzeiro" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+            <div class="col-12">
+                <div class="timeline-wrap">
+                    <div class="timeline-block">
+                        <div class="timeline-ico">
+                            <i class="fa fa-briefcase"></i>
+                        </div>
+
+                        <div class="timeline-header">
+                            <h3>JoyTé, LDA</h3>
+                            <p>May 2024 - Feb 2025</p>
+                        </div>
+
+                        <div class="timeline-content">
+                            <h4>Software Developer - Trainee</h4>
+                            <p>● Develop custom software solutions tailored to the specific needs of various businesses;
+                            </p>
+                            <p>● Enhance existing software by adding new features and optimizing performance;</p>
+                            <p>● Conduct thorough testing to ensure the software’s quality, reliability, and efficiency;
+                            </p>
+                            <p>● Work with databases, ensuring seamless integration with applications;</p>
+                            <p>● Utilize the Laravel framework for agile and robust development;</p>
+                            <p>● Design functional and visually appealing interfaces to complement software solutions;
+                            </p>
+                            <p>● Collaborate with teams to identify improvement opportunities and implement innovative
+                                solutions.</p>
+                        </div>
+
+                    </div>
+
+                    <div class="timeline-block">
+                        <div class="timeline-ico">
+                            <i class="fa fa-briefcase"></i>
+                        </div>
+
+                        <div class="timeline-header">
+                            <h3>Continental</h3>
+                            <p>Mar 2019 - Jun 2019</p>
+                        </div>
+
+                        <div class="timeline-content">
+                            <h4>Trainee de TI</h4>
+                            <p>● Provide technical support to end users, assisting in resolving hardware, software, and
+                                network issues;</p>
+                            <p>● Install and configure operating systems, software, and applications;</p>
+                            <p>● Work closely with IT, development, and other teams to ensure efficient integration of
+                                systems;</p>
+                            <p>● Implementing and maintaining security policies, including antivirus updates, firewalls
+                                and
+                                other protection measures.</p>
+                        </div>
+
+                    </div>
+
+                    <div class="timeline-block">
+                        <div class="timeline-ico">
+                            <i class="fa fa-briefcase"></i>
+                        </div>
+
+                        <div class="timeline-header">
+                            <h3>Mecanarte</h3>
+                            <p>May 2018 - Jun 2018</p>
+                        </div>
+
+                        <div class="timeline-content">
+                            <h4>Trainee de TI</h4>
+                            <p>● Internal maintenance of devices and checking the condition of components;</p>
+                            <p>● Assembling and disassembling hardware components;</p>
+                            <p>● Installing and configuring peripherals;</p>
+                        </div>
+
+                    </div>
+
                 </div>
-                <!-- Adicione outras informações aqui -->
+
+            </div>
+
+        </div>
+
+        <div class="row resume-timeline">
+
+            <div class="col-12 resume-header">
+                <h2>Education</h2>
+            </div>
+
+            <div class="col-12">
+                <div class="timeline-wrap">
+                    <div class="timeline-block">
+                        <div class="timeline-ico">
+                            <i class="fa fa-graduation-cap"></i>
+                        </div>
+                        <div class="timeline-header">
+                            <h3>
+                                Instituto Politécnico de Viana do Castelo</h3>
+                            <p>Jul 2019 - Jul 2023</p>
+                        </div>
+
+                        <div class="timeline-content">
+                            <h4>Licentiate degree, Computer Graphics and Multimedia Engineering</h4>
+                            <p></p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <div class="interface">
+                <h2 class="titulo">MY PORTFOLIO.</h2>
+
+                <!-- Seção de Programação -->
+                <h3 class="subtitulo">💻 Programming</h3>
+                <div class="grid">
+                    <div class="img-port" data-title="Sistema Web"
+                        data-description="Sistema de gerenciamento de clientes." data-category="Web Development">
+                        <img src="img/portfolio.jpg" alt="Salad" width="100%" height="auto">
+                        <a class="card-link open-modal" data-toggle="modal" data-target="#modal1">
+                            <div class="overlay">
+                                <h3>WEB DESIGN</h3>
+                                <p>Personal Portfolio</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="img-port" data-title="Sistema Web"
+                        data-description="Sistema de gerenciamento de clientes." data-category="Web Development">
+                        <img src="img/portfolio/associam.jpg" alt="Salad" width="100%" height="auto">
+                        <a class="card-link open-modal" data-toggle="modal" data-target="#modal5">
+                            <div class="overlay">
+                                <h3>WEB DESIGN | WEB DEVELOPMENT</h3>
+                                <p>WEBSITE</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="img-port">
+                        <img src="img/portfolio/clock.png" width="100%" height="auto">
+                        <a class="card-link open-modal" data-toggle="modal" data-target="#modal6">
+                            <div class="overlay">
+                                <h3>WEB DEVELOPMENT</h3>
+                                <p>DIGITAL CLOCK</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="img-port">
+                        <img src="img/portfolio/todolist.jpg" width="100%" height="auto">
+                        <a class="card-link open-modal" data-toggle="modal" data-target="#modal7">
+                            <div class="overlay">
+                                <h3>WEB DEVELOPMENT</h3>
+                                <p>TO DO LIST</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="img-port">
+                        <img src="img/portfolio/penaltyshoot.jpg" width="100%" height="auto">
+                        <a class="card-link open-modal" data-toggle="modal" data-target="#modal8">
+                            <div class="overlay">
+                                <h3>WEB GAME DEVELOPMENT</h3>
+                                <p>PENALTY SHOOT</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="img-port">
+                        <img src="img/portfolio/savetheplanet.jpg" width="100%" height="auto">
+                        <a class="card-link open-modal" data-toggle="modal" data-target="#modal9">
+                            <div class="overlay">
+                                <h3>WEB GAME DEVELOPMENT</h3>
+                                <p>Save The Planet</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Secção de Design -->
+                <h3 class="subtitulo">🎨 Design</h3>
+                <div class="grid">
+                    <div class="img-port" data-title="Branding"
+                        data-description="Criação de identidade visual para empresa X." data-category="Branding"
+                        data-image="img/portfolio/NeonCreativePortrait.jpg">
+                        <img src="img/portfolio/NeonCreativePortrait.jpg" alt="Neon" width="100%" height="auto">
+                        <a class="card-link open-modal" data-toggle="modal" data-target="#modal2">
+                            <div class="overlay">
+                                <h3>Creative Branding</h3>
+                                <p>Neon Vibes</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="img-port" data-title="Creative Branding"
+                        data-description="Design de interface para e-commerce." data-category="UI/UX">
+                        <img src="img/portfolio/CreativePortraitEffect.jpg" alt="Neon" width="100%" height="auto">
+                        <a class="card-link open-modal" data-toggle="modal" data-target="#modal3">
+                            <div class="overlay">
+                                <h3>Creative Branding</h3>
+                                <p>Portrait Effect</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="img-port" data-title="Creative Branding"
+                        data-description="Design de interface para e-commerce." data-category="UI/UX">
+                        <img src="img/portfolio/CreativeLightCircles.jpg" alt="Neon" width="100%" height="auto">
+                        <a class="card-link open-modal" data-toggle="modal" data-target="#modal4">
+                            <div class="overlay">
+                                <h3>Creative Branding</h3>
+                                <p>Creative Light Circles</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODALS-->
+    <div class="modal fade" id="modal1" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
                 <div class="modal-body">
-                    <p></p>
+                    <img src="img/portfolio.jpg" class="img-fluid w-75" alt="Portfolio">
+                    <div class="modal-info">
+                        <h3>Portfolio</h3>
+                        <p></p>
+                        <span>WEB DESIGN</span>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn-filled" data-dismiss="modal">CLOSE</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    $('#modal1').on('shown.bs.modal', function () {
-        $('#myInput').trigger('focus')
-    })
-    $('#modal2').on('shown.bs.modal', function () {
-        $('#myInput').trigger('focus')
-    })
-    $('#modal3').on('shown.bs.modal', function () {
-        $('#myInput').trigger('focus')
-    })
-</script>
-    
+    <div class="modal fade" id="modal2" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="img/portfolio/NeonCreativePortrait.jpg" class="img-fluid w-75" alt="Portfolio">
+                    <div class="modal-info">
+                        <h3>Neon Vibes</h3>
+                        <p></p>
+                        <span>CREATIVE BRANDING</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-filled" data-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <div class="modal fade" id="modal3" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="img/portfolio/CreativePortraitEffect.jpg" class="img-fluid w-75" alt="Portfolio">
+                    <div class="modal-info">
+                        <h3>Portrait Effect</h3>
+                        <p></p>
+                        <span>CREATIVE BRANDING</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-filled" data-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal4" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="img/portfolio/CreativeLightCircles.jpg" class="img-fluid w-75" alt="Portfolio">
+                    <div class="modal-info">
+                        <h3>Creative Light Circles</h3>
+                        <p></p>
+                        <span>CREATIVE BRANDING</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-filled" data-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal5" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="img/portfolio/associam.jpg" class="img-fluid w-75" alt="Portfolio">
+                    <div class="modal-info">
+                        <h3>WEBSITE</h3>
+                        <p></p>
+                        <span>WEB DESIGN | WEB DEVELOPMENT</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-filled" data-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal6" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="img/portfolio/clock.png" class="img-fluid w-75" alt="Portfolio">
+                    <div class="modal-info">
+                        <h3>DIGITAL CLOCK</h3>
+                        <p></p>
+                        <span>WEB DEVELOPMENT</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-filled" data-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal7" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="img/portfolio/todolist.jpg" class="img-fluid w-75" alt="Portfolio">
+                    <div class="modal-info">
+                        <h3>To Do List</h3>
+                        <p></p>
+                        <span>WEB DEVELOPMENT</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-filled" data-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal8" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="img/portfolio/penaltyshoot.jpg" class="img-fluid w-75" alt="Portfolio">
+                    <div class="modal-info">
+                        <h3>Penalty Shoot</h3>
+                        <p></p>
+                        <span>WEB GAME DEVELOPMENT</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-filled" data-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal9" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe width="1006" height="576" src="https://www.youtube.com/embed/JJ6mdDkmroA"
+                            title="Animação Eco-Escolas | Miguel Cruzeiro" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen></iframe>
+                    </div>
+                    <div class="modal-info">
+                        <h3>Save The Planet</h3>
+                        <p></p>
+                        <span>WEB GAME DEVELOPMENT</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-filled" data-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="interface">
+            <div class="line-footer">
+                <div class="flex">
+                    <div class="logo-footer">
+                        <img src="img/logoberna.png" style="width: 100px; height: 100px;">
+                    </div>
+                    <div class="btn-social">
+                        <a href="https://www.instagram.com/bernaazevedo58/"><button style="background-color: #fff;"><i
+                                    class="bi bi-instagram" style="color: black;"></i></button></a>
+                        <a href="https://www.facebook.com/BernaAzevedo58/"><button style="background-color: #fff;"><i
+                                    class="bi bi-facebook" style="color: black;"></i></button></a>
+                        <a href="https://github.com/Berna58"><button style="background-color: #fff;"><i
+                                    class="bi bi-github" style="color: black;"></i></button></a>
+                        <a href="https://www.linkedin.com/in/bernardo-azevedo-3321aa173/"><button
+                                style="background-color: #fff;"><i class="bi bi-linkedin"
+                                    style="color: black;"></i></button></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="line-footer borda">
+                <p><i class="bi bi-envelope-fill"></i> <a
+                        href="mailto:bernardosilvaazevedo@gmail.com">bernardosilvaazevedo@gmail.com</a></p>
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
 
 </body>
-</html>
 
+</html>
