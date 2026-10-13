@@ -1,0 +1,65 @@
+---
+import { Picture } from 'astro:assets';
+import { useT, type UiKey } from '@/i18n/ui';
+import { projectPath } from '@/i18n/routes';
+import { imageOf, categoryName } from '@/lib/content';
+import type { Locale, Project } from '@/lib/content/schema';
+
+interface Props { project: Project; locale: Locale; headingLevel?: 'h2' | 'h3'; priority?: boolean }
+const { project, locale, headingLevel = 'h3', priority = false } = Astro.props;
+const t = useT(locale);
+const text = project.i18n[locale];
+const Heading = headingLevel;
+const meta = [categoryName(project.category, locale), project.year?.toString(), project.state ? t(('state.' + project.state) as UiKey) : undefined].filter(Boolean);
+---
+<article class="card" data-category={project.category}>
+  <Picture
+    src={imageOf(project.cover)}
+    alt={project.cover.i18n[locale].alt}
+    formats={['avif', 'webp']}
+    widths={[400, 720, 1080]}
+    sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
+    width={1080}
+    loading={priority ? "eager" : "lazy"}
+    class="cover"
+  />
+  <div class="body">
+    <p class="meta mono">{meta.join(' · ')}</p>
+    <Heading class="title"><a href={projectPath(project.slug, locale)}>{text.title}</a></Heading>
+    <p class="summary">{text.summary}</p>
+    {(project.technologies.length > 0 || project.kind === 'case_study') && (
+      <ul class="tags" aria-label="Stack">
+        {project.technologies.map((tech) => <li class="tag">{tech}</li>)}
+        {project.kind === 'case_study' && project.demoUrl && <li class="tag tag--mint">demo</li>}
+        {project.kind === 'case_study' && <li class="tag">{t(('code.' + project.codeVisibility) as UiKey)}</li>}
+      </ul>
+    )}
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--surface);
+    overflow: hidden;
+    transition: transform var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--ink); }
+  .card :global(.cover) { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-bottom: 1px solid var(--line); }
+  .body { display: grid; gap: var(--space-2); align-content: start; padding: var(--space-4) var(--space-5) var(--space-5); }
+  .meta { color: var(--muted); margin: 0; }
+  .title { font-size: var(--step-2); }
+  .title a { color: var(--ink); text-decoration: none; }
+  /* toda a área do cartão é clicável, mantendo um único link acessível */
+  .title a::after { content: ""; position: absolute; inset: 0; }
+  .title a:focus-visible { outline: none; }
+  .card:has(.title a:focus-visible) { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .summary { color: var(--muted); }
+  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: var(--space-2) 0 0; padding: 0; }
+  .tag--mint { background: var(--mint); color: var(--on-mint); border-color: var(--mint); }
+  @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
+</style>

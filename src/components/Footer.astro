@@ -1,0 +1,32 @@
+---
+import { useT, type UiKey } from '@/i18n/ui';
+import { linksFor, profile } from '@/lib/content';
+import type { Locale } from '@/lib/content/schema';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useT(locale);
+const social = linksFor('footer');
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <ul class="social" aria-label={t('footer.social')}>
+      {social.map((link) => (
+        <li><a href={link.url} rel="me noopener" target="_blank">{link.label ?? t(('link.' + link.kind) as UiKey)}</a></li>
+      ))}
+    </ul>
+    <p class="mono muted">
+      <a href="https://github.com/Berna58/berna58.github.io" rel="noopener" target="_blank">{t('footer.source')}</a>
+      <span aria-hidden="true"> · </span>&copy; {year} {profile.fullName}
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer { border-top: 1px solid var(--line); margin-top: var(--space-8); }
+  .footer-inner { display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-6); justify-content: space-between; align-items: center; padding-block: var(--space-6); }
+  .social { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); list-style: none; margin: 0; padding: 0; }
+  .social a { color: var(--ink); font-weight: 600; font-size: var(--step--1); display: inline-block; padding-block: var(--space-2); }
+  .site-footer p a { color: var(--muted); }
+</style>

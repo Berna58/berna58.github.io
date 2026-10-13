@@ -1,0 +1,83 @@
+---
+import '@/styles/project.css';
+import Base from '@/layouts/Base.astro';
+import CaseStudy from '@/shared/CaseStudy';
+import Showcase from '@/shared/Showcase';
+import { useT } from '@/i18n/ui';
+import { routes, projectPath, otherLocale, contactHref } from '@/i18n/routes';
+import { projects, categoryName, profile } from '@/lib/content';
+import { resolveImage, ogImageOf } from '@/lib/content/images';
+import type { Locale, Project } from '@/lib/content/schema';
+
+interface Props { locale: Locale; project: Project }
+const { locale, project } = Astro.props;
+const t = useT(locale);
+const text = project.i18n[locale];
+
+const index = projects.findIndex((p) => p.slug === project.slug);
+const prev = projects[index - 1];
+const next = projects[index + 1];
+
+const cover = await resolveImage(project.cover, locale, '(min-width: 60rem) 55vw, 100vw');
+const gallery = await Promise.all(project.gallery.map((m) => resolveImage(m, locale, '(min-width: 48rem) 48rem, 100vw')));
+const og = await ogImageOf(project.cover);
+const view = { locale, project, categoryLabel: categoryName(project.category, locale), cover, gallery };
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: text.title,
+  description: text.summary,
+  inLanguage: locale === 'pt' ? 'pt-PT' : 'en',
+  author: { '@type': 'Person', name: profile.fullName },
+  dateCreated: project.year ? String(project.year) : undefined,
+  url: new URL(projectPath(project.slug, locale), Astro.site).href,
+  keywords: project.technologies.join(', ') || undefined,
+};
+---
+<Base
+  locale={locale}
+  alternatePath={projectPath(project.slug, otherLocale(locale))}
+  title={text.seoTitle ?? text.title}
+  description={text.seoDescription ?? text.summary}
+  ogImage={og}
+  current="projects"
+  jsonLd={jsonLd}
+>
+  <div class="container page">
+    <a class="back mono" href={routes.projects[locale]}><span aria-hidden="true">&larr;</span> {t('project.back')}</a>
+    {project.kind === 'case_study' ? <CaseStudy {...view} /> : <Showcase {...view} />}
+
+    {project.kind === 'case_study' && (
+      <aside class="clients">
+        <p><strong>{t('project.clients')}</strong></p>
+        <a class="btn btn--primary" href={contactHref(locale)}>{t('project.clientsCta')}</a>
+      </aside>
+    )}
+
+    {(prev || next) && (
+      <nav class="pager" aria-label={t('projects.title')}>
+        {prev ? (
+          <a href={projectPath(prev.slug, locale)}><span class="mono muted">{t('project.prev')}</span><span>{prev.i18n[locale].title}</span></a>
+        ) : (
+          <span></span>
+        )}
+        {next && (
+          <a class="next" href={projectPath(next.slug, locale)}><span class="mono muted">{t('project.next')}</span><span>{next.i18n[locale].title}</span></a>
+        )}
+      </nav>
+    )}
+  </div>
+</Base>
+
+<style>
+  .page { display: grid; gap: var(--space-7); padding-block: var(--space-6) var(--space-8); }
+  .back { color: var(--muted); text-decoration: none; justify-self: start; padding-block: var(--space-2); }
+  .back:hover { color: var(--ink); text-decoration: underline; }
+  .clients { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); padding: var(--space-5); border-radius: var(--radius-m); background: var(--chapter); color: var(--on-chapter); }
+  .clients .btn--primary { border-color: var(--mint); }
+  .pager { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); border-top: 1px solid var(--line); padding-top: var(--space-5); }
+  .pager a { display: grid; gap: var(--space-1); color: var(--ink); text-decoration: none; font-weight: 600; }
+  .pager a:hover span:last-child { text-decoration: underline; }
+  .pager .next { text-align: right; }
+</style>

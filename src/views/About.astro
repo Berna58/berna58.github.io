@@ -1,0 +1,77 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import Timeline from '@/components/Timeline.astro';
+import ContactSection from '@/components/ContactSection.astro';
+import { useT, type UiKey } from '@/i18n/ui';
+import { routes, otherLocale } from '@/i18n/routes';
+import { profile, technologies, experiences, education, imageOf } from '@/lib/content';
+import type { Locale } from '@/lib/content/schema';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useT(locale);
+const text = profile.i18n[locale];
+const groups = (['backend', 'data', 'frontend', 'design', 'tools'] as const)
+  .map((group) => ({ group, items: technologies.filter((tech) => tech.group === group) }))
+  .filter((g) => g.items.length > 0);
+const photoWidth = 160;
+const photoHeight = profile.photo ? Math.round(photoWidth / (profile.photo.width / profile.photo.height)) : 0;
+---
+<Base locale={locale} alternatePath={routes.about[otherLocale(locale)]} title={t('about.title')} description={text.bioShort} current="about">
+  <div class="container page">
+    <header class="intro">
+      {profile.photo && (
+        <Image src={imageOf(profile.photo)} alt={profile.photo.i18n[locale].alt} width={photoWidth} height={photoHeight} class="photo" loading="eager" />
+      )}
+      <div class="intro-text">
+        <h1>{t('about.title')}</h1>
+        <p class="eyebrow">{text.roleLine} &middot; {text.location}</p>
+        <div class="bio">{text.bioLong.split(/\n{2,}/).map((p) => <p>{p}</p>)}</div>
+      </div>
+    </header>
+
+    <section aria-labelledby="about-path">
+      <h2 id="about-path" class="visually-hidden">{t('section.path')}</h2>
+      <Timeline locale={locale} experiences={experiences} education={education} detailed />
+    </section>
+
+    <section class="stack" aria-labelledby="about-stack">
+      <h2 id="about-stack">{t('about.stack')}</h2>
+      <dl>
+        {groups.map(({ group, items }) => (
+          <div>
+            <dt class="mono">{t(('group.' + group) as UiKey)}</dt>
+            <dd><ul class="tags">{items.map((tech) => <li class="tag">{tech.name}</li>)}</ul></dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    {text.aiNote && (
+      <section aria-labelledby="about-ai" class="ai">
+        <h2 id="about-ai">{t('about.ai')}</h2>
+        <div class="bio">{text.aiNote.split(/\n{2,}/).map((p) => <p>{p}</p>)}</div>
+      </section>
+    )}
+  </div>
+  <ContactSection locale={locale} />
+</Base>
+
+<style>
+  .page { display: grid; gap: var(--space-8); padding-block: var(--space-7) var(--space-6); }
+  .intro { display: grid; gap: var(--space-6); align-items: start; }
+  .photo { width: 160px; height: auto; border-radius: var(--radius-m); border: 1px solid var(--line); }
+  .intro-text { display: grid; gap: var(--space-4); }
+  .bio { display: grid; gap: var(--space-4); max-width: var(--measure); }
+  .stack, .ai { display: grid; gap: var(--space-5); }
+  .stack dl { display: grid; gap: var(--space-4); margin: 0; }
+  .stack dl > div { display: grid; gap: var(--space-2); }
+  .stack dt { color: var(--muted); }
+  .stack dd { margin: 0; }
+  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: 0; padding: 0; }
+  @media (min-width: 48rem) {
+    .intro { grid-template-columns: 160px 1fr; }
+    .stack dl > div { grid-template-columns: 8rem 1fr; align-items: baseline; }
+  }
+</style>

@@ -1,0 +1,85 @@
+---
+import Base from '@/layouts/Base.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import { useT } from '@/i18n/ui';
+import { routes, otherLocale } from '@/i18n/routes';
+import { projects, categories } from '@/lib/content';
+import type { Locale } from '@/lib/content/schema';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useT(locale);
+const used = categories
+  .map((c) => ({ slug: c.slug, name: c.i18n[locale].name, count: projects.filter((p) => p.category === c.slug).length }))
+  .filter((c) => c.count > 0);
+---
+<Base locale={locale} alternatePath={routes.projects[otherLocale(locale)]} title={t('projects.title')} description={t('projects.intro')} current="projects">
+  <div class="container page">
+    <header class="head">
+      <h1>{t('projects.title')}</h1>
+      <p class="muted">{t('projects.intro')}</p>
+    </header>
+
+    {used.length > 1 && (
+      <div class="filters" role="group" aria-label={t('projects.filterLabel')} data-filters hidden>
+        <button type="button" class="chip" data-filter="" aria-pressed="true">{t('projects.all')} <span class="count">{projects.length}</span></button>
+        {used.map((c) => (
+          <button type="button" class="chip" data-filter={c.slug} aria-pressed="false">{c.name} <span class="count">{c.count}</span></button>
+        ))}
+      </div>
+    )}
+
+    <p class="visually-hidden" role="status" aria-live="polite" data-filter-status></p>
+
+    <div class="grid" data-grid>
+      {projects.map((project, i) => <ProjectCard project={project} locale={locale} headingLevel="h2" priority={i < 2} />)}
+    </div>
+  </div>
+</Base>
+
+<script>
+  // Filtro progressivo: sem JavaScript todos os projetos ficam visíveis.
+  const bar = document.querySelector<HTMLElement>('[data-filters]');
+  const grid = document.querySelector<HTMLElement>('[data-grid]');
+  const status = document.querySelector<HTMLElement>('[data-filter-status]');
+  if (bar && grid) {
+    bar.hidden = false;
+    const buttons = [...bar.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const cards = [...grid.querySelectorAll<HTMLElement>('[data-category]')];
+    const apply = (slug: string) => {
+      for (const card of cards) card.hidden = Boolean(slug) && card.dataset.category !== slug;
+      for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.filter === slug));
+      const active = buttons.find((b) => b.dataset.filter === slug);
+      if (status && active) status.textContent = active.textContent?.trim() ?? '';
+      const url = new URL(location.href);
+      if (slug) url.searchParams.set('categoria', slug);
+      else url.searchParams.delete('categoria');
+      history.replaceState(null, '', url);
+    };
+    for (const b of buttons) b.addEventListener('click', () => apply(b.dataset.filter ?? ''));
+    const initial = new URL(location.href).searchParams.get('categoria') ?? '';
+    if (buttons.some((b) => b.dataset.filter === initial)) apply(initial);
+  }
+</script>
+
+<style>
+  .page { display: grid; gap: var(--space-6); padding-block: var(--space-7) var(--space-8); }
+  .head { display: grid; gap: var(--space-3); }
+  .filters { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .filters[hidden] { display: none; }
+  .chip {
+    min-height: 44px;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--ink);
+    font: 600 var(--step--1)/1 var(--font-body);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--ink); }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .count { font-family: var(--font-mono); font-weight: 400; opacity: 0.75; margin-left: var(--space-1); }
+  .grid { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+  .grid :global([hidden]) { display: none; }
+</style>

@@ -1,0 +1,47 @@
+---
+/**
+ * Mostra o email como texto selecionável e um botão para o copiar.
+ * Sem JavaScript fica só a ligação mailto e o endereço visível.
+ */
+import { useT } from '@/i18n/ui';
+import type { Locale } from '@/lib/content/schema';
+
+interface Props { locale: Locale; email: string; showAddress?: boolean; primary?: boolean }
+const { locale, email, showAddress = false, primary = false } = Astro.props;
+const t = useT(locale);
+---
+<span class="copy-email" data-copy-email={email} data-copied={t('cta.copied')} data-failed={t('cta.copyFailed')}>
+  {showAddress && <a class="address mono" href={'mailto:' + email}>{email}</a>}
+  <button type="button" class:list={['btn', { 'btn--primary': primary }]} data-copy-button hidden>{t('cta.copyEmail')}</button>
+  {!showAddress && <a class="btn no-js-mail" href={'mailto:' + email}>{t('link.email')}</a>}
+  <span class="status visually-hidden" role="status" aria-live="polite"></span>
+</span>
+
+<script>
+  for (const wrapper of document.querySelectorAll<HTMLElement>('[data-copy-email]')) {
+    const button = wrapper.querySelector<HTMLButtonElement>('[data-copy-button]');
+    const fallback = wrapper.querySelector<HTMLElement>('.no-js-mail');
+    const status = wrapper.querySelector<HTMLElement>('.status');
+    if (!button || !status) continue;
+    button.hidden = false;
+    if (fallback) fallback.hidden = true;
+    const label = button.textContent;
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(wrapper.dataset.copyEmail ?? '');
+        status.textContent = wrapper.dataset.copied ?? '';
+        button.textContent = wrapper.dataset.copied ?? '';
+        setTimeout(() => (button.textContent = label), 2000);
+      } catch {
+        status.textContent = wrapper.dataset.failed ?? '';
+        if (fallback) fallback.hidden = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .copy-email { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+  .address { color: inherit; overflow-wrap: anywhere; }
+  [hidden] { display: none !important; }
+</style>

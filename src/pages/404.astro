@@ -1,0 +1,24 @@
+---
+import Base from '@/layouts/Base.astro';
+import { useT } from '@/i18n/ui';
+import { routes } from '@/i18n/routes';
+const t = useT('pt');
+const en = useT('en');
+---
+<Base locale="pt" alternatePath="/en/" title={t('notFound.title')} noindex>
+  <div class="container page">
+    <h1>404</h1>
+    <p>{t('notFound.text')}</p>
+    <p lang="en" class="muted">{en('notFound.text')}</p>
+    <div class="ctas">
+      <a class="btn btn--primary" href={routes.home.pt}>{t('notFound.home')}</a>
+      <a class="btn" href={routes.projects.pt}>{t('nav.projects')}</a>
+      <a class="btn" href={routes.home.en} lang="en">{en('notFound.home')}</a>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .page { display: grid; gap: var(--space-4); padding-block: var(--space-9); }
+  .ctas { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
+</style>

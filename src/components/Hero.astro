@@ -1,0 +1,57 @@
+---
+import StatusCard from './StatusCard.astro';
+import CopyEmail from './CopyEmail.astro';
+import { useT } from '@/i18n/ui';
+import { routes } from '@/i18n/routes';
+import { profile, cvFor } from '@/lib/content';
+import type { Locale } from '@/lib/content/schema';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useT(locale);
+const text = profile.i18n[locale];
+// A parte depois do travessão é realçada a menta (ex.: "... — da base de dados à interface.").
+const [lead, emphasis] = text.headline.split(' — ');
+const cv = cvFor(locale);
+---
+<section class="hero container" aria-labelledby="hero-title">
+  <p class="eyebrow">{text.roleLine} · {text.location}</p>
+  <h1 id="hero-title">
+    {emphasis ? (<>{lead} — <span class="highlight">{emphasis}</span></>) : text.headline}
+  </h1>
+  <ol class="layers" aria-label={t('hero.layersLabel')}>
+    {t('hero.layers').map((layer) => <li>{layer}</li>)}
+  </ol>
+  <div class="hero-row">
+    <StatusCard locale={locale} />
+    <div class="ctas">
+      <a class="btn btn--primary" href={routes.projects[locale]}>{t('cta.projects')}</a>
+      {cv && <a class="btn" href={cv.href} hreflang={cv.fallback ? (locale === 'pt' ? 'en' : 'pt') : undefined}>{cv.fallback ? t('cta.cvOther') : t('cta.cv')}</a>}
+      <CopyEmail locale={locale} email={profile.email} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero { padding-block: var(--space-8) var(--space-7); display: grid; gap: var(--space-5); }
+  h1 { max-width: 18ch; }
+  .layers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .layers li { padding: 0.3rem 0.55rem; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--surface); }
+  .layers li + li { position: relative; margin-left: var(--space-5); }
+  .layers li + li::before { content: "→"; position: absolute; left: calc(-1 * var(--space-5)); width: var(--space-5); text-align: center; color: var(--muted); }
+  .hero-row { display: grid; gap: var(--space-5); align-items: start; margin-top: var(--space-3); }
+  .ctas { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+  @media (min-width: 52rem) {
+    .hero-row { grid-template-columns: minmax(0, 26rem) 1fr; }
+  }
+</style>

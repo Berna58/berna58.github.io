@@ -1,0 +1,60 @@
+---
+import { useT, formatYearMonth, type UiKey } from '@/i18n/ui';
+import type { Experience, Education, Locale } from '@/lib/content/schema';
+
+interface Props { locale: Locale; experiences: Experience[]; education?: Education[]; detailed?: boolean }
+const { locale, experiences, education = [], detailed = false } = Astro.props;
+const t = useT(locale);
+const period = (start: string, end: string | null) =>
+  `${formatYearMonth(start, locale)} – ${end ? formatYearMonth(end, locale) : t('date.present')}`;
+---
+<div class="timeline">
+  {experiences.length > 0 && (
+    <section aria-labelledby={`exp-${locale}`}>
+      <h3 id={`exp-${locale}`} class="group-title">{t('experience.title')}</h3>
+      <ol>
+        {experiences.map((exp) => {
+          const text = exp.i18n[locale];
+          return (
+            <li>
+              <p class="period mono">{period(exp.start, exp.end)} · {t(('employment.' + exp.employmentType) as UiKey)}</p>
+              <p class="role"><strong>{text.role}</strong> — {exp.orgUrl ? <a href={exp.orgUrl} rel="noopener" target="_blank">{exp.organization}</a> : exp.organization}</p>
+              {detailed && text.description && <p class="muted">{text.description}</p>}
+              {detailed && text.highlights.length > 0 && (
+                <ul class="highlights">{text.highlights.map((h) => <li>{h}</li>)}</ul>
+              )}
+              {exp.technologies.length > 0 && (
+                <ul class="tags" aria-label="Stack">{exp.technologies.map((tech) => <li class="tag">{tech}</li>)}</ul>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  )}
+  {education.length > 0 && (
+    <section aria-labelledby={`edu-${locale}`}>
+      <h3 id={`edu-${locale}`} class="group-title">{t('education.title')}</h3>
+      <ol>
+        {education.map((edu) => (
+          <li>
+            <p class="period mono">{period(edu.start, edu.end)}</p>
+            <p class="role"><strong>{edu.i18n[locale].degree}</strong> — {edu.institution}</p>
+            {detailed && edu.i18n[locale].description && <p class="muted">{edu.i18n[locale].description}</p>}
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+</div>
+
+<style>
+  .timeline { display: grid; gap: var(--space-7); }
+  .group-title { font-size: var(--step-1); letter-spacing: -0.01em; margin-bottom: var(--space-4); }
+  ol { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-5); }
+  ol > li { display: grid; gap: var(--space-2); padding-left: var(--space-5); border-left: 2px solid var(--line); }
+  .period { color: var(--muted); }
+  .role { max-width: var(--measure); }
+  .highlights { margin: 0; padding-left: 1.1rem; display: grid; gap: var(--space-1); max-width: var(--measure); }
+  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: 0; padding: 0; }
+</style>

@@ -1,0 +1,80 @@
+---
+import '@fontsource-variable/bricolage-grotesque/opsz.css';
+import '@fontsource/atkinson-hyperlegible-next/400.css';
+import '@fontsource/atkinson-hyperlegible-next/600.css';
+import '@fontsource/atkinson-hyperlegible-mono/400.css';
+import '@fontsource/atkinson-hyperlegible-mono/500.css';
+import '@/styles/global.css';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import { useT } from '@/i18n/ui';
+import { profile, site } from '@/lib/content';
+import type { Locale } from '@/lib/content/schema';
+
+interface Props {
+  locale: Locale;
+  /** Caminho equivalente no outro idioma (para hreflang e para o seletor de idioma). */
+  alternatePath: string;
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  current?: 'home' | 'projects' | 'about';
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>;
+}
+
+const { locale, alternatePath, title, description, ogImage, current, noindex = false, jsonLd } = Astro.props;
+const t = useT(locale);
+const siteText = site.i18n[locale];
+const pageTitle = title ? `${title} — ${profile.fullName}` : siteText.title;
+const pageDescription = description ?? siteText.description;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const alternate = new URL(alternatePath, Astro.site);
+const ptUrl = locale === 'pt' ? canonical : alternate;
+const enUrl = locale === 'en' ? canonical : alternate;
+const ogUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
+---
+<!doctype html>
+<html lang={t('meta.lang')}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonical.href} />
+    <link rel="alternate" hreflang="pt" href={ptUrl.href} />
+    <link rel="alternate" hreflang="en" href={enUrl.href} />
+    <link rel="alternate" hreflang="x-default" href={ptUrl.href} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#f4f6f5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1c1e22" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={profile.fullName} />
+    <meta property="og:locale" content={locale === 'pt' ? 'pt_PT' : 'en_GB'} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical.href} />
+    {ogUrl && <meta property="og:image" content={ogUrl} />}
+    <meta name="twitter:card" content={ogUrl ? 'summary_large_image' : 'summary'} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    <script is:inline>
+      // Aplica a preferência de tema guardada antes de pintar a página (evita o "flash").
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          if (saved === 'dark' || saved === 'light') document.documentElement.setAttribute('data-theme', saved);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">{t('skip')}</a>
+    <Header locale={locale} alternatePath={alternatePath} current={current} />
+    <main id="conteudo" tabindex="-1">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+  </body>
+</html>

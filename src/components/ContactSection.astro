@@ -1,0 +1,31 @@
+---
+import CopyEmail from './CopyEmail.astro';
+import { useT, type UiKey } from '@/i18n/ui';
+import { profile, linksFor, cvFor } from '@/lib/content';
+import type { Locale } from '@/lib/content/schema';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useT(locale);
+const links = linksFor('contact').filter((l) => l.kind !== 'email');
+const cv = cvFor(locale);
+---
+<section id="contacto" class="chapter contact" aria-labelledby="contact-title">
+  <div class="container inner">
+    <h2 id="contact-title">{t('section.contact')}</h2>
+    <p class="lead">{t('contact.text')}</p>
+    <CopyEmail locale={locale} email={profile.email} showAddress primary />
+    <ul class="links">
+      {links.map((link) => <li><a class="btn" href={link.url} rel="me noopener" target="_blank">{link.label ?? t(('link.' + link.kind) as UiKey)}</a></li>)}
+      {cv && <li><a class="btn" href={cv.href}>{cv.fallback ? t('cta.cvOther') : t('cta.cv')}</a></li>}
+    </ul>
+    <p class="muted">{t('contact.clients')}</p>
+  </div>
+</section>
+
+<style>
+  .contact { padding-block: var(--space-8); margin-top: var(--space-6); }
+  .inner { display: grid; gap: var(--space-5); justify-items: start; }
+  .lead { font-size: var(--step-1); max-width: 40ch; }
+  .links { display: flex; flex-wrap: wrap; gap: var(--space-3); list-style: none; margin: 0; padding: 0; }
+</style>

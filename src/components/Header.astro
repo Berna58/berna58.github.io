@@ -1,0 +1,96 @@
+---
+import { useT } from '@/i18n/ui';
+import { routes, otherLocale, contactHref } from '@/i18n/routes';
+import { profile } from '@/lib/content';
+import type { Locale } from '@/lib/content/schema';
+
+interface Props { locale: Locale; alternatePath: string; current?: 'home' | 'projects' | 'about' }
+const { locale, alternatePath, current } = Astro.props;
+const t = useT(locale);
+const other = otherLocale(locale);
+---
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="wordmark" href={routes.home[locale]} aria-current={current === 'home' ? 'page' : undefined}>{profile.fullName}</a>
+    <nav aria-label={t('nav.label')}>
+      <ul>
+        <li><a href={routes.projects[locale]} aria-current={current === 'projects' ? 'page' : undefined}>{t('nav.projects')}</a></li>
+        <li><a href={routes.about[locale]} aria-current={current === 'about' ? 'page' : undefined}>{t('nav.about')}</a></li>
+        <li><a href={contactHref(locale)}>{t('nav.contact')}</a></li>
+      </ul>
+    </nav>
+    <div class="header-tools">
+      <a class="lang" href={alternatePath} hreflang={other} lang={other === 'pt' ? 'pt-PT' : 'en'} title={t('lang.switchLabel')}>
+        <span aria-hidden="true">{t('lang.switch')}</span><span class="visually-hidden">{t('lang.switchLabel')}</span>
+      </a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" hidden>
+        <span class="visually-hidden">{t('theme.toggle')}</span>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  // O botão só aparece com JavaScript; sem ele, o site segue o tema do sistema.
+  const button = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  if (button) {
+    const root = document.documentElement;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const isDark = () => root.dataset.theme === 'dark' || (!root.dataset.theme && media.matches);
+    const sync = () => button.setAttribute('aria-pressed', String(isDark()));
+    button.hidden = false;
+    sync();
+    media.addEventListener('change', sync);
+    button.addEventListener('click', () => {
+      const next = isDark() ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {
+        // sem armazenamento: a escolha dura só esta visita
+      }
+      sync();
+    });
+  }
+</script>
+
+<style>
+  .site-header { border-bottom: 1px solid var(--line); }
+  .header-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-6);
+    padding-block: var(--space-4);
+  }
+  .wordmark {
+    font: 800 1.125rem/1 var(--font-display);
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-decoration: none;
+    margin-right: auto;
+  }
+  nav ul { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); list-style: none; margin: 0; padding: 0; }
+  nav a { color: var(--ink); text-decoration: none; font-size: var(--step--1); font-weight: 600; display: inline-block; padding-block: var(--space-2); }
+  nav a:hover, nav a[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.35em; }
+  .header-tools { display: flex; align-items: center; gap: var(--space-2); }
+  .lang, .theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: transparent;
+    color: var(--ink);
+    font: 500 var(--step--1)/1 var(--font-mono);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .lang:hover, .theme-toggle:hover { border-color: var(--ink); }
+  .theme-toggle[aria-pressed="true"] { background: var(--mint); color: var(--on-mint); border-color: var(--mint); }
+  .theme-toggle[hidden] { display: none; }
+</style>
