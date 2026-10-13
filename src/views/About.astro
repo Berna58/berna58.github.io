@@ -22,7 +22,7 @@ const photoHeight = profile.photo ? Math.round(photoWidth / (profile.photo.width
   <div class="container page">
     <header class="intro">
       {profile.photo && (
-        <Image src={imageOf(profile.photo)} alt={profile.photo.i18n[locale].alt} width={photoWidth} height={photoHeight} class="photo" loading="eager" />
+        <Image src={imageOf(profile.photo)} alt={profile.photo.i18n[locale].alt} width={photoWidth} height={photoHeight} widths={[photoWidth, profile.photo.width]} sizes={`${photoWidth}px`} class="photo" loading="eager" />
       )}
       <div class="intro-text">
         <h1>{t('about.title')}</h1>

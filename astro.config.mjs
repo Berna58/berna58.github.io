@@ -8,7 +8,8 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'always',
   compressHTML: true,
-  build: { format: 'directory' },
+  // CSS pequeno: vai dentro do HTML para não bloquear a primeira pintura
+  build: { format: 'directory', inlineStylesheets: 'always' },
   integrations: [
     react(),
     sitemap({ filter: (page) => !page.includes('/admin/') }),

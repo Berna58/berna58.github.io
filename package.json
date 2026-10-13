@@ -18,14 +18,12 @@
     "prebuild": "npm run sync",
     "precheck": "npm run sync",
     "pretest": "npm run sync",
-    "test:db": "vitest run --config vitest.db.config.ts"
+    "test:db": "vitest run --config vitest.db.config.ts",
+    "test:admin": "playwright test --config playwright.admin.config.ts"
   },
   "dependencies": {
     "@astrojs/react": "7.0.1",
     "@astrojs/sitemap": "3.7.4",
-    "@fontsource-variable/bricolage-grotesque": "5.3.0",
-    "@fontsource/atkinson-hyperlegible-mono": "5.3.0",
-    "@fontsource/atkinson-hyperlegible-next": "5.3.0",
     "@supabase/supabase-js": "2.117.3",
     "astro": "7.3.8",
     "react": "19.3.0",
