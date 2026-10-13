@@ -291,6 +291,7 @@ function BuildBar() {
   const [state, setState] = useState<BuildState | null>(null);
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [sentAt, setSentAt] = useState<string | null>(null);
   const poll = useRef<number | undefined>(undefined);
 
   const stopPolling = () => {
@@ -302,7 +303,8 @@ function BuildBar() {
     try {
       const next = await buildStatus();
       setState(next);
-      if (next.status === 'completed') {
+      // 'unknown' = sem token do Vercel para consultar o estado: não há nada para acompanhar.
+      if (next.status === 'completed' || next.status === 'unknown') {
         stopPolling();
         setBusy(false);
       }
@@ -323,6 +325,7 @@ function BuildBar() {
     setMessage('');
     try {
       await triggerBuild();
+      setSentAt(new Date().toISOString());
       setState({ status: 'queued', conclusion: null, createdAt: new Date().toISOString(), url: null });
       stopPolling();
       poll.current = window.setInterval(() => void refresh(), 8000);
@@ -333,8 +336,10 @@ function BuildBar() {
   }
 
   const time = state?.createdAt ? new Date(state.createdAt).toLocaleString('pt-PT', { dateStyle: 'short', timeStyle: 'short' }) : '';
-  let label = 'Ainda não há publicações registadas.';
-  let tone = 'neutral';
+  let label = sentAt
+    ? `Pedido enviado ao Vercel às ${new Date(sentAt).toLocaleTimeString('pt-PT', { timeStyle: 'short' })}. O site atualiza em 1 a 3 minutos.`
+    : 'Quando acabares as alterações, publica-as no site.';
+  let tone = sentAt ? 'ok' : 'neutral';
   if (state?.status === 'queued' || state?.status === 'in_progress') {
     label = 'A publicar… o site atualiza em 1 a 3 minutos.';
     tone = 'progress';

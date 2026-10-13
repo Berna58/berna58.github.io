@@ -15,3 +15,12 @@ supabase/.temp/
 # conteúdo gerado antes do build (scripts/sync-content.mjs)
 src/generated/
 public/cv/
+
+.vercel
+.env*.local
+
+# configuração local de ferramentas de IA (skills instaladas no projeto)
+.agents/
+.aider-desk/
+.claude/
+skills-lock.json

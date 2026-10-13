@@ -18,11 +18,13 @@ const out = join(root, 'src/generated');
 const mediaOut = join(out, 'media');
 const cvOut = join(root, 'public/cv');
 
+// Chave de serviço: nome antigo (service_role) ou novo (secret), conforme a versão da integração Supabase.
+process.env.SUPABASE_SERVICE_ROLE_KEY ??= process.env.SUPABASE_SECRET_KEY;
 const useSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-// Em produção (workflow de deploy) é obrigatório usar o Supabase: nunca publicar o seed local por engano.
-if (process.env.REQUIRE_SUPABASE === '1' && !useSupabase) {
-  console.error('REQUIRE_SUPABASE=1, mas faltam SUPABASE_URL e/ou SUPABASE_SERVICE_ROLE_KEY. O build foi interrompido.');
+// No Vercel (produção e pré-visualizações) é obrigatório usar o Supabase: nunca publicar o seed local por engano.
+if ((process.env.REQUIRE_SUPABASE === '1' || process.env.VERCEL === '1') && !useSupabase) {
+  console.error('Build no Vercel sem SUPABASE_URL e/ou SUPABASE_SERVICE_ROLE_KEY. Liga a integração Supabase ao projeto. O build foi interrompido.');
   process.exit(1);
 }
 

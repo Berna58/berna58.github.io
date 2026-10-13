@@ -1,8 +1,11 @@
 import { createClient, type PostgrestError } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
-const url = import.meta.env.PUBLIC_SUPABASE_URL as string | undefined;
-const anonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined;
+// PUBLIC_* (local) ou NEXT_PUBLIC_* (criadas pela integração Supabase do Vercel).
+const url = (import.meta.env.PUBLIC_SUPABASE_URL ?? import.meta.env.NEXT_PUBLIC_SUPABASE_URL) as string | undefined;
+const anonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY ??
+  import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+  import.meta.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) as string | undefined;
 
 /** O painel só funciona com as variáveis públicas do Supabase definidas no build. */
 export const isConfigured = Boolean(url && anonKey);
