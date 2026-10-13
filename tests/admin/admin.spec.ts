@@ -158,10 +158,64 @@ test('criar, publicar, despublicar e eliminar um projeto sem tocar no código', 
 
 test('reordenar move o projeto na lista do site', async ({ page }) => {
   await login(page);
+  await expect(page.locator('.adm-row-title').first()).toBeVisible();
   const titles = () => page.locator('.adm-row-title').allTextContents();
   const before = await titles();
   await page.getByRole('button', { name: `Descer ${before[0]}` }).click();
   await expect.poll(titles).toEqual([before[1], before[0], ...before.slice(2)]);
   await page.getByRole('button', { name: `Subir ${before[0]}` }).click();
   await expect.poll(titles).toEqual(before);
+});
+
+test('perfil, percurso e CV geridos pelo painel chegam ao conteúdo do site', async ({ page }) => {
+  await login(page);
+  type Exported = {
+    profile: { available: boolean; i18n: { pt: { location: string } } };
+    experiences: { organization: string }[];
+    cv: { pt: { file: string } | null };
+  };
+  const exported = async () => (await service.rpc('export_published_content')).data as unknown as Exported;
+  const original = await exported();
+
+  // Perfil: mudar a localização e a disponibilidade.
+  await page.getByRole('link', { name: 'Perfil' }).click();
+  await page.locator('#p-location-pt').fill('Braga, Portugal');
+  await page.locator('#p-available').uncheck();
+  await page.getByRole('button', { name: 'Guardar perfil' }).click();
+  await expect(page.getByText('Guardado.', { exact: false })).toBeVisible();
+  let content = await exported();
+  expect(content.profile.i18n.pt.location).toBe('Braga, Portugal');
+  expect(content.profile.available).toBe(false);
+  // repor
+  await page.locator('#p-location-pt').fill(original.profile.i18n.pt.location);
+  await page.locator('#p-available').check();
+  await page.getByRole('button', { name: 'Guardar perfil' }).click();
+  await expect(page.getByText('Guardado.', { exact: false })).toBeVisible();
+
+  // Percurso: adicionar e eliminar uma experiência.
+  await page.getByRole('link', { name: 'Percurso' }).click();
+  await page.getByRole('button', { name: 'Adicionar experiência' }).click();
+  const editor = page.locator('.adm-inline-editor');
+  await editor.getByLabel('Organização', { exact: true }).fill('Empresa de Teste');
+  await editor.getByLabel('Início').fill('2025-11');
+  await editor.getByLabel('Função (PT)').fill('Developer');
+  await editor.getByRole('button', { name: 'English' }).click();
+  await editor.getByLabel('Função (EN)').fill('Developer');
+  await editor.getByRole('button', { name: 'Guardar experiência' }).click();
+  await expect(page.getByText('Developer — Empresa de Teste')).toBeVisible();
+  content = await exported();
+  expect(content.experiences[0].organization).toBe('Empresa de Teste');
+  page.once('dialog', (dialog) => void dialog.accept());
+  await page.getByRole('listitem').filter({ hasText: 'Empresa de Teste' }).getByRole('button', { name: 'Eliminar' }).click();
+  await expect(page.getByText('Developer — Empresa de Teste')).toHaveCount(0);
+  content = await exported();
+  expect(content.experiences.some((e) => e.organization === 'Empresa de Teste')).toBe(false);
+
+  // CV em português.
+  await page.getByRole('link', { name: 'CV e SEO' }).click();
+  await page.locator('#cv-pt').setInputFiles('supabase/seed/media/CV_BernardoAzevedo_2025.pdf');
+  await expect(page.getByText('Guardado.', { exact: false })).toBeVisible({ timeout: 20000 });
+  content = await exported();
+  expect(content.cv.pt).not.toBeNull();
+  await service.from('cv_files').delete().eq('locale', 'pt');
 });
