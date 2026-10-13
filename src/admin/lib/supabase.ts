@@ -19,6 +19,7 @@ export function describeError(error: unknown): string {
   if (!e) return 'Ocorreu um erro inesperado.';
   if (e.code === '23505') return 'Já existe um projeto com esse endereço (slug). Escolhe outro.';
   if (e.code === '23514' || e.code === 'check_violation') return [e.message, e.details].filter(Boolean).join(' ');
+  if (e.code === '23503') return 'Não é possível apagar: ainda está a ser usado (por exemplo, por um projeto). Muda isso primeiro.';
   if (e.code === '42501') return 'Sem permissão. Volta a entrar com o código do autenticador.';
   if (e.code === 'P0002') return e.message ?? 'O registo não existe.';
   if (e.message?.includes('Failed to fetch')) return 'Sem ligação ao servidor. Verifica a internet e tenta de novo.';

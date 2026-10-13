@@ -681,6 +681,10 @@ export type Database = {
       export_published_content: { Args: never; Returns: Json }
       is_admin: { Args: never; Returns: boolean }
       media_json: { Args: { media_id: string }; Returns: Json }
+      move_item: {
+        Args: { direction: number; item_id: string; item_table: string }
+        Returns: undefined
+      }
       move_project: {
         Args: { direction: number; project_id: string }
         Returns: undefined
@@ -693,7 +697,12 @@ export type Database = {
         Args: { project_id: string }
         Returns: string[]
       }
+      save_category: { Args: { payload: Json }; Returns: string }
+      save_education: { Args: { payload: Json }; Returns: string }
+      save_experience: { Args: { payload: Json }; Returns: string }
+      save_profile: { Args: { payload: Json }; Returns: undefined }
       save_project: { Args: { payload: Json }; Returns: string }
+      save_site_settings: { Args: { payload: Json }; Returns: undefined }
       set_project_status: {
         Args: {
           new_status: Database["public"]["Enums"]["publish_status"]
