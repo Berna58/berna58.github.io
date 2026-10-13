@@ -1,5 +1,7 @@
-// Devolve o estado da última execução do workflow de publicação.
-import { corsHeaders, json, requireAdmin, githubConfig, githubHeaders } from '../_shared/admin.ts';
+// Estado do último deploy de produção no Vercel (só se VERCEL_TOKEN e VERCEL_PROJECT_ID estiverem definidos).
+import { corsHeaders, json, requireAdmin, vercelConfig } from '../_shared/admin.ts';
+
+const UNKNOWN = { status: 'unknown', conclusion: null, createdAt: null, url: null };
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders(request) });
@@ -8,21 +10,25 @@ Deno.serve(async (request) => {
   const denied = await requireAdmin(request);
   if (denied) return denied;
 
-  const { token, repo, workflow } = githubConfig();
-  if (!token) return json(request, 200, { status: 'unknown', conclusion: null, createdAt: null, url: null });
+  const { token, projectId, teamId } = vercelConfig();
+  if (!token || !projectId) return json(request, 200, UNKNOWN);
 
-  const response = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/${workflow}/runs?per_page=1`, {
-    headers: githubHeaders(token),
+  const query = new URLSearchParams({ projectId, target: 'production', limit: '1' });
+  if (teamId) query.set('teamId', teamId);
+  const response = await fetch(`https://api.vercel.com/v6/deployments?${query}`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
-  if (!response.ok) return json(request, 502, { error: `Não foi possível consultar o GitHub (${response.status}).` });
+  if (!response.ok) return json(request, 502, { error: `Não foi possível consultar o Vercel (${response.status}).` });
 
-  const body = await response.json();
-  const run = body.workflow_runs?.[0];
-  if (!run) return json(request, 200, { status: 'unknown', conclusion: null, createdAt: null, url: null });
+  const deployment = (await response.json()).deployments?.[0];
+  if (!deployment) return json(request, 200, UNKNOWN);
+
+  const state: string = deployment.readyState ?? deployment.state ?? '';
+  const done = ['READY', 'ERROR', 'CANCELED'].includes(state);
   return json(request, 200, {
-    status: ['queued', 'in_progress', 'completed'].includes(run.status) ? run.status : 'in_progress',
-    conclusion: run.conclusion,
-    createdAt: run.created_at,
-    url: run.html_url,
+    status: done ? 'completed' : state === 'QUEUED' ? 'queued' : 'in_progress',
+    conclusion: done ? (state === 'READY' ? 'success' : 'failure') : null,
+    createdAt: new Date(deployment.createdAt ?? deployment.created).toISOString(),
+    url: deployment.inspectorUrl ?? null,
   });
 });

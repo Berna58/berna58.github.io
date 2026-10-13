@@ -1,7 +1,7 @@
 // Código partilhado pelas Edge Functions do painel.
 import { createClient } from 'npm:@supabase/supabase-js@2.117.3';
 
-const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') ?? 'https://berna58.github.io,http://127.0.0.1:4321,http://localhost:4321')
+const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') ?? 'https://bernardo-azevedo-portfolio.vercel.app,http://127.0.0.1:4321,http://localhost:4321')
   .split(',')
   .map((origin) => origin.trim());
 
@@ -39,20 +39,16 @@ export async function requireAdmin(request: Request): Promise<Response | null> {
   return null;
 }
 
-export function githubConfig() {
+/**
+ * Configuração do Vercel (segredos da Edge Function):
+ *  - VERCEL_DEPLOY_HOOK_URL: obrigatório para publicar (Vercel > Project > Settings > Git > Deploy Hooks).
+ *  - VERCEL_TOKEN + VERCEL_PROJECT_ID (+ VERCEL_TEAM_ID): opcionais, só para mostrar o estado do último deploy.
+ */
+export function vercelConfig() {
   return {
-    token: Deno.env.get('GITHUB_TOKEN') ?? '',
-    repo: Deno.env.get('GITHUB_REPO') ?? 'Berna58/berna58.github.io',
-    workflow: Deno.env.get('GITHUB_WORKFLOW') ?? 'deploy.yml',
-    ref: Deno.env.get('GITHUB_REF') ?? 'main',
-  };
-}
-
-export function githubHeaders(token: string): Record<string, string> {
-  return {
-    Authorization: `Bearer ${token}`,
-    Accept: 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
-    'User-Agent': 'portfolio-admin',
+    deployHook: Deno.env.get('VERCEL_DEPLOY_HOOK_URL') ?? '',
+    token: Deno.env.get('VERCEL_TOKEN') ?? '',
+    projectId: Deno.env.get('VERCEL_PROJECT_ID') ?? '',
+    teamId: Deno.env.get('VERCEL_TEAM_ID') ?? '',
   };
 }
