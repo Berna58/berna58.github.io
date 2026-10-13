@@ -1,0 +1,198 @@
+{
+  "generatedAt": "2026-10-13T00:00:00.000Z",
+  "source": "fixtures",
+  "profile": {
+    "fullName": "Bernardo Azevedo",
+    "email": "bernardosilvaazevedo@gmail.com",
+    "available": true,
+    "workModes": ["remote", "hybrid", "onsite"],
+    "workZones": ["Viana do Castelo", "Braga", "Porto"],
+    "photo": {
+      "file": "profile.jpg", "width": 306, "height": 319,
+      "i18n": { "pt": { "alt": "Fotografia de Bernardo Azevedo" }, "en": { "alt": "Photo of Bernardo Azevedo" } }
+    },
+    "i18n": {
+      "pt": {
+        "headline": "Desenvolvo aplicações web completas — da base de dados à interface.",
+        "roleLine": "Developer full-stack",
+        "location": "Norte de Portugal",
+        "bioShort": "Licenciado em Engenharia de Computação Gráfica e Multimédia. Desenvolvo aplicações web com Laravel, .NET e SQL, com atenção ao detalhe de quem também trabalha em design.",
+        "bioLong": "Licenciei-me em Engenharia de Computação Gráfica e Multimédia no Instituto Politécnico de Viana do Castelo, em 2023, uma formação que junta programação, tecnologia e comunicação visual.\n\nEntre 2024 e 2025 fui developer em estágio na JoyTé, onde desenvolvi soluções de software à medida com Laravel, acrescentei funcionalidades a sistemas existentes e trabalhei na integração com bases de dados.\n\nEm paralelo, faço design para redes sociais em part-time na EF Gaspar Azevedo.",
+        "principles": []
+      },
+      "en": {
+        "headline": "I build complete web applications — from the database to the interface.",
+        "roleLine": "Full-stack developer",
+        "location": "Northern Portugal",
+        "bioShort": "Computer Graphics and Multimedia Engineering graduate. I build web applications with Laravel, .NET and SQL, with the eye for detail of someone who also works in design.",
+        "bioLong": "I graduated in Computer Graphics and Multimedia Engineering from the Polytechnic Institute of Viana do Castelo in 2023, a degree that combines programming, technology and visual communication.\n\nFrom 2024 to 2025 I was a trainee developer at JoyTé, where I built custom software with Laravel, added features to existing systems and worked on database integration.\n\nAlongside that, I work part-time as a social media designer at EF Gaspar Azevedo.",
+        "principles": []
+      }
+    }
+  },
+  "site": {
+    "ogImage": null,
+    "i18n": {
+      "pt": { "title": "Bernardo Azevedo — Developer full-stack", "description": "Desenvolvo aplicações web completas, da base de dados à interface, com Laravel, .NET e SQL. Disponível para novas oportunidades." },
+      "en": { "title": "Bernardo Azevedo — Full-stack developer", "description": "I build complete web applications, from the database to the interface, with Laravel, .NET and SQL. Open to new opportunities." }
+    }
+  },
+  "categories": [
+    { "slug": "web", "sortOrder": 1, "i18n": { "pt": { "name": "Web" }, "en": { "name": "Web" } } },
+    { "slug": "design", "sortOrder": 2, "i18n": { "pt": { "name": "Design" }, "en": { "name": "Design" } } }
+  ],
+  "technologies": [
+    { "name": "PHP", "group": "backend", "sortOrder": 1 },
+    { "name": "Laravel", "group": "backend", "sortOrder": 2 },
+    { "name": "C#", "group": "backend", "sortOrder": 3 },
+    { "name": ".NET", "group": "backend", "sortOrder": 4 },
+    { "name": "SQL", "group": "data", "sortOrder": 5 },
+    { "name": "HTML", "group": "frontend", "sortOrder": 6 },
+    { "name": "CSS", "group": "frontend", "sortOrder": 7 },
+    { "name": "Photoshop", "group": "design", "sortOrder": 8 },
+    { "name": "Illustrator", "group": "design", "sortOrder": 9 }
+  ],
+  "projects": [
+    {
+      "slug": "associam", "kind": "showcase", "featured": true, "sortOrder": 1, "category": "web",
+      "year": null, "state": null, "codeVisibility": "private",
+      "demoUrl": null, "repoUrl": null, "videoUrl": null,
+      "cover": {
+        "file": "associam.jpg", "width": 1847, "height": 881,
+        "i18n": {
+          "pt": { "alt": "Página de próximos eventos do site da Associam, com o calendário de fevereiro de 2025" },
+          "en": { "alt": "Upcoming events page of the Associam website, showing the February 2025 calendar" }
+        }
+      },
+      "gallery": [], "technologies": [], "publishedAt": "2025-02-20T00:00:00.000Z",
+      "i18n": {
+        "pt": { "title": "Associam", "summary": "Website de uma associação, com calendário de eventos, documentos, publicações, formulários e acesso com login e registo.", "features": [], "decisions": [], "challenges": [] },
+        "en": { "title": "Associam", "summary": "Website for an association, with an events calendar, documents, publications, forms and sign-in and registration.", "features": [], "decisions": [], "challenges": [] }
+      }
+    },
+    {
+      "slug": "neon-vibes", "kind": "showcase", "featured": false, "sortOrder": 10, "category": "design",
+      "year": null, "state": null, "codeVisibility": "private",
+      "demoUrl": null, "repoUrl": null, "videoUrl": null,
+      "cover": {
+        "file": "NeonCreativePortrait.jpg", "width": 3744, "height": 3239,
+        "i18n": {
+          "pt": { "alt": "Retrato com um triângulo de luz néon cor-de-rosa à volta da pessoa" },
+          "en": { "alt": "Portrait framed by a pink neon light triangle" }
+        }
+      },
+      "gallery": [], "technologies": [], "publishedAt": "2025-02-20T00:00:00.000Z",
+      "i18n": {
+        "pt": { "title": "Neon Vibes", "summary": "Composição fotográfica com luz néon.", "features": [], "decisions": [], "challenges": [] },
+        "en": { "title": "Neon Vibes", "summary": "Photographic composition with neon light.", "features": [], "decisions": [], "challenges": [] }
+      }
+    },
+    {
+      "slug": "portrait-effect", "kind": "showcase", "featured": false, "sortOrder": 11, "category": "design",
+      "year": null, "state": null, "codeVisibility": "private",
+      "demoUrl": null, "repoUrl": null, "videoUrl": null,
+      "cover": {
+        "file": "CreativePortraitEffect.jpg", "width": 1536, "height": 2048,
+        "i18n": {
+          "pt": { "alt": "Retrato num parque dividido em painéis verticais desalinhados" },
+          "en": { "alt": "Portrait in a park split into offset vertical panels" }
+        }
+      },
+      "gallery": [], "technologies": [], "publishedAt": "2025-02-20T00:00:00.000Z",
+      "i18n": {
+        "pt": { "title": "Portrait Effect", "summary": "Retrato fragmentado em painéis.", "features": [], "decisions": [], "challenges": [] },
+        "en": { "title": "Portrait Effect", "summary": "Portrait broken into panels.", "features": [], "decisions": [], "challenges": [] }
+      }
+    },
+    {
+      "slug": "creative-light-circles", "kind": "showcase", "featured": false, "sortOrder": 12, "category": "design",
+      "year": null, "state": null, "codeVisibility": "private",
+      "demoUrl": null, "repoUrl": null, "videoUrl": null,
+      "cover": {
+        "file": "CreativeLightCircles.jpg", "width": 1536, "height": 2048,
+        "i18n": {
+          "pt": { "alt": "Pessoa de costas, rodeada por um círculo de luz azul" },
+          "en": { "alt": "Person seen from behind, surrounded by a circle of blue light" }
+        }
+      },
+      "gallery": [], "technologies": [], "publishedAt": "2025-02-20T00:00:00.000Z",
+      "i18n": {
+        "pt": { "title": "Creative Light Circles", "summary": "Composição fotográfica com círculos de luz.", "features": [], "decisions": [], "challenges": [] },
+        "en": { "title": "Creative Light Circles", "summary": "Photographic composition with circles of light.", "features": [], "decisions": [], "challenges": [] }
+      }
+    }
+  ],
+  "experiences": [
+    {
+      "organization": "EF Gaspar Azevedo", "orgUrl": null, "employmentType": "part_time",
+      "start": "2022", "end": null, "sortOrder": 1, "technologies": [],
+      "i18n": {
+        "pt": { "role": "Designer de redes sociais", "description": "Criação de materiais promocionais para redes sociais com ferramentas Adobe.", "highlights": [] },
+        "en": { "role": "Social media designer", "description": "Promotional materials for social media, made with Adobe tools.", "highlights": [] }
+      }
+    },
+    {
+      "organization": "JoyTé, Lda.", "orgUrl": null, "employmentType": "internship",
+      "start": "2024-05", "end": "2025-02", "sortOrder": 2, "technologies": ["Laravel", "PHP", "SQL"],
+      "i18n": {
+        "pt": {
+          "role": "Software developer (estágio)",
+          "highlights": [
+            "Desenvolvimento de software à medida para empresas, com Laravel.",
+            "Novas funcionalidades e otimização de desempenho em sistemas existentes.",
+            "Integração das aplicações com bases de dados.",
+            "Testes para garantir a qualidade e a fiabilidade do software.",
+            "Desenho de interfaces funcionais para as soluções desenvolvidas."
+          ]
+        },
+        "en": {
+          "role": "Software developer (trainee)",
+          "highlights": [
+            "Built custom software for businesses with Laravel.",
+            "Added features to existing systems and improved their performance.",
+            "Integrated applications with databases.",
+            "Tested software for quality and reliability.",
+            "Designed functional interfaces for the solutions we built."
+          ]
+        }
+      }
+    },
+    {
+      "organization": "Continental", "orgUrl": null, "employmentType": "internship",
+      "start": "2019-03", "end": "2019-06", "sortOrder": 3, "technologies": [],
+      "i18n": {
+        "pt": { "role": "Estagiário de TI", "highlights": ["Suporte técnico a utilizadores em hardware, software e rede.", "Instalação e configuração de sistemas operativos e aplicações.", "Manutenção de medidas de segurança, como antivírus e firewalls."] },
+        "en": { "role": "IT trainee", "highlights": ["Technical support for users on hardware, software and network issues.", "Installed and configured operating systems and applications.", "Maintained security measures such as antivirus and firewalls."] }
+      }
+    },
+    {
+      "organization": "Mecanarte", "orgUrl": null, "employmentType": "internship",
+      "start": "2018-05", "end": "2018-06", "sortOrder": 4, "technologies": [],
+      "i18n": {
+        "pt": { "role": "Estagiário de TI", "highlights": ["Manutenção e montagem de hardware.", "Instalação e configuração de periféricos."] },
+        "en": { "role": "IT trainee", "highlights": ["Hardware maintenance and assembly.", "Installed and configured peripherals."] }
+      }
+    }
+  ],
+  "education": [
+    {
+      "institution": "Instituto Politécnico de Viana do Castelo", "start": "2019", "end": "2023", "sortOrder": 1,
+      "i18n": {
+        "pt": { "degree": "Licenciatura em Engenharia de Computação Gráfica e Multimédia" },
+        "en": { "degree": "BSc in Computer Graphics and Multimedia Engineering" }
+      }
+    }
+  ],
+  "links": [
+    { "kind": "email", "url": "mailto:bernardosilvaazevedo@gmail.com", "placements": ["contact"], "sortOrder": 1 },
+    { "kind": "linkedin", "url": "https://www.linkedin.com/in/bernardo-azevedo-3321aa173/", "placements": ["contact", "footer"], "sortOrder": 2 },
+    { "kind": "github", "url": "https://github.com/Berna58", "placements": ["contact", "footer"], "sortOrder": 3 },
+    { "kind": "behance", "url": "https://www.behance.net/bernardosi469a", "placements": ["design", "footer"], "sortOrder": 4 },
+    { "kind": "instagram", "url": "https://www.instagram.com/bernaazevedo58/", "placements": ["footer"], "sortOrder": 5 },
+    { "kind": "facebook", "url": "https://www.facebook.com/BernaAzevedo58/", "placements": ["footer"], "sortOrder": 6 }
+  ],
+  "cv": {
+    "pt": null,
+    "en": { "file": "CV_BernardoAzevedo_2025.pdf", "updatedAt": "2025-02-19" }
+  }
+}
