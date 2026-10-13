@@ -3,6 +3,9 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,
+  // o axe é pesado: poucos processos em paralelo evitam timeouts falsos (sobretudo com o Supabase local ligado)
+  workers: 2,
+  timeout: 60_000,
   reporter: process.env.CI ? 'github' : 'list',
   use: { baseURL: 'http://127.0.0.1:4322' },
   webServer: {

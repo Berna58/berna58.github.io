@@ -17,7 +17,8 @@
     "predev": "npm run sync",
     "prebuild": "npm run sync",
     "precheck": "npm run sync",
-    "pretest": "npm run sync"
+    "pretest": "npm run sync",
+    "test:db": "vitest run --config vitest.db.config.ts"
   },
   "dependencies": {
     "@astrojs/react": "7.0.1",
