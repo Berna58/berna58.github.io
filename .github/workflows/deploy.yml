@@ -1,0 +1,61 @@
+# Publica o site no GitHub Pages com o conteúdo PUBLICADO no Supabase.
+# Disparado pelo botão "Publicar" do painel (Edge Function trigger-build -> workflow_dispatch)
+# ou por um push para main.
+# Requer: Settings > Pages > Source = "GitHub Actions" (passo M8, com autorização).
+name: Publicar site
+run-name: Publicar site (${{ github.event_name == 'workflow_dispatch' && 'painel' || 'push' }})
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Publicações seguidas ficam em fila; nunca se cancela um deploy a meio.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build com o conteúdo do Supabase
+        run: npm run build
+        env:
+          REQUIRE_SUPABASE: '1'
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Valores públicos do painel /admin (o acesso é controlado por RLS + MFA)
+          PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

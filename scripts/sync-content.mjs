@@ -18,6 +18,14 @@ const out = join(root, 'src/generated');
 const mediaOut = join(out, 'media');
 const cvOut = join(root, 'public/cv');
 
+const useSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+// Em produção (workflow de deploy) é obrigatório usar o Supabase: nunca publicar o seed local por engano.
+if (process.env.REQUIRE_SUPABASE === '1' && !useSupabase) {
+  console.error('REQUIRE_SUPABASE=1, mas faltam SUPABASE_URL e/ou SUPABASE_SERVICE_ROLE_KEY. O build foi interrompido.');
+  process.exit(1);
+}
+
 await rm(out, { recursive: true, force: true });
 await rm(cvOut, { recursive: true, force: true });
 await mkdir(mediaOut, { recursive: true });
@@ -26,7 +34,6 @@ await mkdir(cvOut, { recursive: true });
 /** Nome legível para o PDF descarregado pelos visitantes. */
 const cvFileName = (locale) => `Bernardo_Azevedo_CV_${locale.toUpperCase()}.pdf`;
 
-const useSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 let content;
 
 if (useSupabase) {

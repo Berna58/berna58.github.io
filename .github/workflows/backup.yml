@@ -1,0 +1,69 @@
+# Backup semanal do conteúdo (incluindo rascunhos) para um repositório PRIVADO.
+# Não usa artefactos do workflow: num repositório público qualquer pessoa os pode descarregar.
+# Também conta como atividade no projeto Supabase gratuito (evita a pausa por inatividade).
+name: Backup semanal
+
+on:
+  schedule:
+    - cron: '17 3 * * 1' # segundas-feiras, 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359 # v3.0.1 (fixado por SHA)
+        with:
+          version: 2.120.0
+
+      - name: Acesso ao repositório privado de backups
+        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0 (fixado por SHA: tem acesso à chave de deploy)
+        with:
+          ssh-private-key: ${{ secrets.BACKUP_DEPLOY_KEY }}
+
+      - name: Clonar portfolio-backups
+        run: git clone git@github.com:Berna58/portfolio-backups.git backup
+
+      - name: Exportar a base de dados
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          mkdir -p backup/db
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f backup/db/schema.sql
+          supabase db dump --db-url "$SUPABASE_DB_URL" --data-only -f backup/db/data.sql
+
+      - name: Exportar imagens e CV
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/backup-media.mjs backup/media
+
+      - name: Guardar no repositório privado
+        working-directory: backup
+        run: |
+          git config user.name "portfolio-backup"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Sem alterações desde o último backup."
+            exit 0
+          fi
+          git commit -m "Backup $(date -u +%Y-%m-%d)"
+          git push
