@@ -1,0 +1,86 @@
+/*
+ * Design tokens — Fase 6 (tipografia "Esquema" + Graphite + Menta).
+ * Contrastes medidos (WCAG 2.x) estão anotados; não usar --mint como texto em fundo claro (1,2:1).
+ */
+:root {
+  /* cor — tema claro */
+  --paper: #f4f6f5;
+  --surface: #ffffff;
+  --ink: #25272c;          /* 13,8:1 sobre --paper */
+  --muted: #5c6168;        /* 5,8:1 */
+  --line: #d9dedc;
+  --accent-text: #0e7a5e;  /* links e texto de acento, 4,9:1 */
+  --mint: #b8f7e4;         /* superfície/realce, sempre com --on-mint por cima */
+  --on-mint: #25272c;      /* 12,4:1 */
+  --chapter: #25272c;      /* blocos escuros (capítulos) */
+  --on-chapter: #f4f6f5;
+  --on-chapter-muted: #a9aeb4;
+  --focus: #25272c;
+
+  /* tipografia */
+  --font-display: "Bricolage Grotesque Variable", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.25rem;
+  --step-2: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  --step-3: clamp(2rem, 1.4rem + 2.4vw, 3rem);
+  --step-4: clamp(2.5rem, 1.5rem + 4.2vw, 4.25rem);
+
+  /* espaço e forma */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 7rem;
+  --gutter: clamp(1rem, 4vw, 3.5rem);
+  --container: 72rem;
+  --measure: 65ch;
+  --radius-s: 4px;
+  --radius-m: 6px;
+  --radius-pill: 999px;
+
+  /* movimento */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-1: 150ms;
+  --dur-2: 250ms;
+  --dur-3: 400ms;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1c1e22;
+    --surface: #25272c;
+    --ink: #edf0ef;          /* 14,6:1 */
+    --muted: #a3a9af;        /* 7,0:1 */
+    --line: #3a3d44;
+    --accent-text: #b8f7e4;  /* 13,9:1 */
+    --chapter: #25272c;
+    --on-chapter: #edf0ef;
+    --on-chapter-muted: #a3a9af;
+    --focus: #b8f7e4;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #1c1e22;
+  --surface: #25272c;
+  --ink: #edf0ef;
+  --muted: #a3a9af;
+  --line: #3a3d44;
+  --accent-text: #b8f7e4;
+  --chapter: #25272c;
+  --on-chapter: #edf0ef;
+  --on-chapter-muted: #a3a9af;
+  --focus: #b8f7e4;
+  color-scheme: dark;
+}
