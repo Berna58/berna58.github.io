@@ -1,0 +1,32 @@
+---
+/**
+ * Painel de administração. A aplicação corre só no browser (client:only) e fala diretamente
+ * com o Supabase; sem sessão de admin com MFA não mostra nem recebe conteúdo.
+ */
+import '@/styles/global.css';
+import '@/styles/project.css';
+import '@/admin/admin.css';
+import AdminApp from '@/admin/App';
+---
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Painel — Bernardo Azevedo</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          if (saved === 'dark' || saved === 'light') document.documentElement.setAttribute('data-theme', saved);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="admin">
+    <AdminApp client:only="react" />
+    <noscript><p class="container">O painel precisa de JavaScript.</p></noscript>
+  </body>
+</html>
