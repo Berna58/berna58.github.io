@@ -471,7 +471,7 @@ export function ProjectEditor({ id, onDone }: { id: string | null; onDone: () =>
 
 // ---------- componentes de formulário ----------
 
-function Fieldset({ legend, children }: { legend: string; children: ReactNode }) {
+export function Fieldset({ legend, children }: { legend: string; children: ReactNode }) {
   return (
     <fieldset className="adm-fieldset">
       <legend>{legend}</legend>
@@ -480,7 +480,7 @@ function Fieldset({ legend, children }: { legend: string; children: ReactNode })
   );
 }
 
-function Field({ label, hint, error, children }: { label: string; hint?: string; error?: string; children: ReactNode }) {
+export function Field({ label, hint, error, children }: { label: string; hint?: string; error?: string; children: ReactNode }) {
   return (
     <label className={`adm-field${error ? ' adm-field--error' : ''}`}>
       <span>{label}</span>
@@ -491,7 +491,7 @@ function Field({ label, hint, error, children }: { label: string; hint?: string;
   );
 }
 
-function ListEditor<T extends Record<string, string>>({ label, items, fields, onChange }: {
+export function ListEditor<T extends Record<string, string>>({ label, items, fields, onChange }: {
   label: string;
   items: T[];
   fields: [keyof T & string, string][];
@@ -529,7 +529,7 @@ function ListEditor<T extends Record<string, string>>({ label, items, fields, on
   );
 }
 
-function MediaField({ label, items, multiple, onChange }: { label: string; items: MediaItem[]; multiple: boolean; onChange: (items: MediaItem[]) => void }) {
+export function MediaField({ label, items, multiple, onChange }: { label: string; items: MediaItem[]; multiple: boolean; onChange: (items: MediaItem[]) => void }) {
   const [file, setFile] = useState<File | null>(null);
   const [alt, setAlt] = useState<Record<Locale, string>>({ pt: '', en: '' });
   const [busy, setBusy] = useState(false);

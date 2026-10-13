@@ -7,6 +7,16 @@ import { supabase, isConfigured, describeError } from './lib/supabase';
 import { useHashRoute, navigate } from './lib/router';
 import { triggerBuild, buildStatus, type BuildState } from './lib/projects';
 import { ProjectList, ProjectEditor } from './projects';
+import { ProfileSection, PathSection, TaxonomySection, LinksSection, CvSeoSection } from './content';
+
+const SECTIONS = [
+  ['projetos', 'Projetos'],
+  ['perfil', 'Perfil'],
+  ['percurso', 'Percurso'],
+  ['taxonomias', 'Categorias e tecnologias'],
+  ['ligacoes', 'Ligações'],
+  ['cv-seo', 'CV e SEO'],
+] as const;
 
 type Gate = 'loading' | 'login' | 'enroll' | 'verify' | 'forbidden' | 'ready';
 
@@ -250,7 +260,9 @@ function Shell({ email }: { email: string }) {
         <div className="adm-header-inner">
           <a className="adm-brand" href="#/projetos">Painel</a>
           <nav aria-label="Secções do painel">
-            <a href="#/projetos" aria-current={section === 'projetos' ? 'page' : undefined}>Projetos</a>
+            {SECTIONS.map(([key, label]) => (
+              <a key={key} href={`#/${key}`} aria-current={section === key ? 'page' : undefined}>{label}</a>
+            ))}
           </nav>
           <div className="adm-header-tools">
             <a href="/" target="_blank" rel="noopener">Ver site</a>
@@ -263,6 +275,11 @@ function Shell({ email }: { email: string }) {
       <main id="conteudo" className="adm-main">
         {section === 'projetos' && !id && <ProjectList />}
         {section === 'projetos' && id && <ProjectEditor key={id} id={id === 'novo' ? null : id} onDone={() => navigate('projetos')} />}
+        {section === 'perfil' && <ProfileSection />}
+        {section === 'percurso' && <PathSection />}
+        {section === 'taxonomias' && <TaxonomySection />}
+        {section === 'ligacoes' && <LinksSection />}
+        {section === 'cv-seo' && <CvSeoSection />}
       </main>
     </div>
   );

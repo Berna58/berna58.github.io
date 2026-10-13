@@ -81,6 +81,12 @@
 .adm-row-main p { margin-top: var(--space-1); }
 .adm-row-meta, .adm-row-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
 .adm-icon { min-width: 44px; justify-content: center; }
+.adm-row--stack { grid-template-columns: 1fr !important; }
+.adm-header nav { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
+.adm-inline-editor, .adm-inline-form { display: grid; gap: var(--space-3); }
+.adm-inline-form { grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); align-items: end; }
+.adm-inline-editor { padding-top: var(--space-4); border-top: 1px dashed var(--line); }
+.adm-section h2 { font-size: var(--step-2); margin-top: var(--space-4); }
 
 .adm-badge { display: inline-block; padding: 0.3rem 0.55rem; border-radius: var(--radius-s); font: 600 0.8125rem/1 var(--font-mono); border: 1px solid var(--line); }
 .adm-badge--published { background: var(--mint); color: var(--on-mint); border-color: var(--mint); }
