@@ -23,12 +23,15 @@ await rm(cvOut, { recursive: true, force: true });
 await mkdir(mediaOut, { recursive: true });
 await mkdir(cvOut, { recursive: true });
 
+/** Nome legível para o PDF descarregado pelos visitantes. */
+const cvFileName = (locale) => `Bernardo_Azevedo_CV_${locale.toUpperCase()}.pdf`;
+
 const useSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 let content;
 
 if (useSupabase) {
   const { exportFromSupabase } = await import('./lib/export-supabase.mjs');
-  content = await exportFromSupabase({ mediaDir: mediaOut, cvDir: cvOut });
+  content = await exportFromSupabase({ mediaDir: mediaOut, cvDir: cvOut, cvFileName });
 } else {
   const seedDir = join(root, 'supabase/seed');
   content = JSON.parse(await readFile(join(seedDir, 'content.json'), 'utf8'));
@@ -41,7 +44,9 @@ if (useSupabase) {
   for (const f of files) await copyFile(join(seedDir, 'media', f), join(mediaOut, f));
   for (const locale of ['pt', 'en']) {
     const cv = content.cv[locale];
-    if (cv) await copyFile(join(seedDir, 'media', cv.file), join(cvOut, cv.file));
+    if (!cv) continue;
+    await copyFile(join(seedDir, 'media', cv.file), join(cvOut, cvFileName(locale)));
+    cv.file = cvFileName(locale);
   }
 }
 
