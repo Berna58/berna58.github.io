@@ -17,16 +17,28 @@
         "roleLine": "Developer full-stack",
         "location": "Norte de Portugal",
         "bioShort": "Licenciado em Engenharia de Computação Gráfica e Multimédia. Desenvolvo aplicações web com Laravel, .NET e SQL, com atenção ao detalhe de quem também trabalha em design.",
-        "bioLong": "Licenciei-me em Engenharia de Computação Gráfica e Multimédia no Instituto Politécnico de Viana do Castelo, em 2023, uma formação que junta programação, tecnologia e comunicação visual.\n\nEntre 2024 e 2025 fui developer em estágio na JoyTé, onde desenvolvi soluções de software à medida com Laravel, acrescentei funcionalidades a sistemas existentes e trabalhei na integração com bases de dados.\n\nEm paralelo, faço design para redes sociais em part-time na EF Gaspar Azevedo.",
-        "principles": []
+        "bioLong": "Licenciei-me em Engenharia de Computação Gráfica e Multimédia no Politécnico de Viana do Castelo, um curso que junta programação, design e comunicação visual. É nesse cruzamento que mais gosto de trabalhar: perceber como um sistema funciona por dentro e como vai ser usado por quem está do outro lado.\n\nTrabalhei em aplicações web com Laravel, em soluções ERP com Sage X3 e C#/.NET, e em integrações entre sistemas e bases de dados. Antes disso passei pelo suporte informático, onde aprendi a resolver problemas reais de utilizadores com método.",
+        "aiNote": "Uso ChatGPT, Lovable e Claude Code para explorar soluções e acelerar tarefas. O que entra no projeto é lido, adaptado e testado por mim; as decisões técnicas continuam a ser minhas.",
+        "principles": [
+          { "title": "Compreender", "description": "Começo pelos requisitos e por quem vai usar: o que tem de funcionar, para quem e com que limites." },
+          { "title": "Explorar", "description": "Comparo abordagens antes de escrever código. É aqui que a IA me ajuda a levantar hipóteses e a prototipar." },
+          { "title": "Implementar", "description": "Código simples, legível e integrado com o que já existe." },
+          { "title": "Testar e validar", "description": "Testo os casos reais e revejo o que a IA produziu. Só dou por concluído quando funciona para quem usa." }
+        ]
       },
       "en": {
         "headline": "I build complete web applications — from the database to the interface.",
         "roleLine": "Full-stack developer",
         "location": "Northern Portugal",
         "bioShort": "Computer Graphics and Multimedia Engineering graduate. I build web applications with Laravel, .NET and SQL, with the eye for detail of someone who also works in design.",
-        "bioLong": "I graduated in Computer Graphics and Multimedia Engineering from the Polytechnic Institute of Viana do Castelo in 2023, a degree that combines programming, technology and visual communication.\n\nFrom 2024 to 2025 I was a trainee developer at JoyTé, where I built custom software with Laravel, added features to existing systems and worked on database integration.\n\nAlongside that, I work part-time as a social media designer at EF Gaspar Azevedo.",
-        "principles": []
+        "bioLong": "I graduated in Computer Graphics and Multimedia Engineering from the Polytechnic Institute of Viana do Castelo, a degree that combines programming, design and visual communication. That crossover is where I most enjoy working: understanding how a system works on the inside and how it will be used by the person on the other side.\n\nI have worked on web applications with Laravel, on ERP solutions with Sage X3 and C#/.NET, and on integrations between systems and databases. Before that I worked in IT support, where I learned to solve real users' problems methodically.",
+        "aiNote": "I use ChatGPT, Lovable and Claude Code to explore solutions and speed up tasks. Whatever goes into the project is read, adapted and tested by me; the technical decisions remain mine.",
+        "principles": [
+          { "title": "Understand", "description": "I start with the requirements and the people who will use it: what has to work, for whom and within which limits." },
+          { "title": "Explore", "description": "I compare approaches before writing code. This is where AI helps me raise hypotheses and prototype." },
+          { "title": "Build", "description": "Simple, readable code that fits with what already exists." },
+          { "title": "Test and validate", "description": "I test real cases and review what the AI produced. It is only done when it works for the people using it." }
+        ]
       }
     }
   },
@@ -46,11 +58,18 @@
     { "name": "Laravel", "group": "backend", "sortOrder": 2 },
     { "name": "C#", "group": "backend", "sortOrder": 3 },
     { "name": ".NET", "group": "backend", "sortOrder": 4 },
-    { "name": "SQL", "group": "data", "sortOrder": 5 },
-    { "name": "HTML", "group": "frontend", "sortOrder": 6 },
-    { "name": "CSS", "group": "frontend", "sortOrder": 7 },
-    { "name": "Photoshop", "group": "design", "sortOrder": 8 },
-    { "name": "Illustrator", "group": "design", "sortOrder": 9 }
+    { "name": "Sage X3", "group": "backend", "sortOrder": 5 },
+    { "name": "4GL", "group": "backend", "sortOrder": 6 },
+    { "name": "SQL", "group": "data", "sortOrder": 7 },
+    { "name": "SQL Server", "group": "data", "sortOrder": 8 },
+    { "name": "Supabase", "group": "data", "sortOrder": 9 },
+    { "name": "HTML", "group": "frontend", "sortOrder": 10 },
+    { "name": "CSS", "group": "frontend", "sortOrder": 11 },
+    { "name": "JavaScript", "group": "frontend", "sortOrder": 12 },
+    { "name": "TypeScript", "group": "frontend", "sortOrder": 13 },
+    { "name": "React", "group": "frontend", "sortOrder": 14 },
+    { "name": "Photoshop", "group": "design", "sortOrder": 15 },
+    { "name": "Illustrator", "group": "design", "sortOrder": 16 }
   ],
   "projects": [
     {
@@ -124,8 +143,32 @@
   ],
   "experiences": [
     {
+      "organization": "Liderteam", "orgUrl": null, "employmentType": "full_time",
+      "start": "2025-05", "end": "2026-05", "sortOrder": 0, "technologies": ["Sage X3", "4GL", "C#", ".NET", "SQL Server"],
+      "i18n": {
+        "pt": {
+          "role": "Consultor developer Sage X3",
+          "highlights": [
+            "Desenvolvimento e personalização de soluções ERP em Sage X3, à medida das necessidades de cada cliente.",
+            "Lógica de backend e integrações para melhorar processos de negócio, incluindo Filedoc, Tickelia e Sage Sales Management.",
+            "Otimização do desempenho do sistema através de desenvolvimentos específicos.",
+            "Trabalho com equipas multidisciplinares na entrega de soluções empresariais."
+          ]
+        },
+        "en": {
+          "role": "Sage X3 consultant developer",
+          "highlights": [
+            "Developed and customised Sage X3 ERP solutions for each client's business needs.",
+            "Implemented backend logic and integrations to improve business workflows, including Filedoc, Tickelia and Sage Sales Management.",
+            "Improved system performance through tailored developments.",
+            "Worked with cross-functional teams to deliver enterprise solutions."
+          ]
+        }
+      }
+    },
+    {
       "organization": "EF Gaspar Azevedo", "orgUrl": null, "employmentType": "part_time",
-      "start": "2022", "end": null, "sortOrder": 1, "technologies": [],
+      "start": "2022", "end": null, "sortOrder": 1, "technologies": ["Photoshop", "Illustrator"],
       "i18n": {
         "pt": { "role": "Designer de redes sociais", "description": "Criação de materiais promocionais para redes sociais com ferramentas Adobe.", "highlights": [] },
         "en": { "role": "Social media designer", "description": "Promotional materials for social media, made with Adobe tools.", "highlights": [] }
@@ -140,7 +183,7 @@
           "highlights": [
             "Desenvolvimento de software à medida para empresas, com Laravel.",
             "Novas funcionalidades e otimização de desempenho em sistemas existentes.",
-            "Integração das aplicações com bases de dados.",
+            "Desenho e implementação de APIs REST e integração com bases de dados.",
             "Testes para garantir a qualidade e a fiabilidade do software.",
             "Desenho de interfaces funcionais para as soluções desenvolvidas."
           ]
@@ -150,7 +193,7 @@
           "highlights": [
             "Built custom software for businesses with Laravel.",
             "Added features to existing systems and improved their performance.",
-            "Integrated applications with databases.",
+            "Designed and implemented REST APIs and database integrations.",
             "Tested software for quality and reliability.",
             "Designed functional interfaces for the solutions we built."
           ]
@@ -176,7 +219,7 @@
   ],
   "education": [
     {
-      "institution": "Instituto Politécnico de Viana do Castelo", "start": "2019", "end": "2023", "sortOrder": 1,
+      "institution": "Instituto Politécnico de Viana do Castelo", "start": "2019-09", "end": "2023-07", "sortOrder": 1,
       "i18n": {
         "pt": { "degree": "Licenciatura em Engenharia de Computação Gráfica e Multimédia" },
         "en": { "degree": "BSc in Computer Graphics and Multimedia Engineering" }
@@ -193,6 +236,6 @@
   ],
   "cv": {
     "pt": null,
-    "en": { "file": "CV_BernardoAzevedo_2025.pdf", "updatedAt": "2025-02-19" }
+    "en": { "file": "CV_BernardoAzevedo_2026.pdf", "updatedAt": "2026-10-16" }
   }
 }
