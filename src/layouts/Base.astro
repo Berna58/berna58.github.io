@@ -9,6 +9,7 @@ import Footer from '@/components/Footer.astro';
 import { useT } from '@/i18n/ui';
 import { profile, site } from '@/lib/content';
 import type { Locale } from '@/lib/content/schema';
+import Analytics from '@vercel/analytics/astro';
 
 interface Props {
   locale: Locale;
