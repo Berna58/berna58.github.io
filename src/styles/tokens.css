@@ -12,7 +12,10 @@
   --accent-text: #0e7a5e;  /* links e texto de acento, 4,9:1 */
   --mint: #b8f7e4;         /* superfície/realce, sempre com --on-mint por cima */
   --on-mint: #25272c;      /* 12,4:1 */
+  --mint-shape: #b8f7e4;   /* formas decorativas; no escuro fica mais apagada */
   --chapter: #25272c;      /* blocos escuros (capítulos) */
+  --chapter-card: #25272c; /* cartões escuros dentro do papel; no escuro desce um tom para se destacar */
+  --texture-opacity: 0.22; /* textura de linhas dos topos de página; no escuro mais baixa, porque a menta brilha mais */
   --on-chapter: #f4f6f5;
   --on-chapter-muted: #a9aeb4;
   --focus: #25272c;
@@ -67,6 +70,9 @@
     --on-chapter: #edf0ef;
     --on-chapter-muted: #a3a9af;
     --focus: #b8f7e4;
+    --mint-shape: #2f5047;
+    --chapter-card: #141518;
+    --texture-opacity: 0.12;
     color-scheme: dark;
   }
 }
@@ -82,5 +88,8 @@
   --on-chapter: #edf0ef;
   --on-chapter-muted: #a3a9af;
   --focus: #b8f7e4;
+  --mint-shape: #2f5047;
+  --chapter-card: #141518;
+  --texture-opacity: 0.12;
   color-scheme: dark;
 }

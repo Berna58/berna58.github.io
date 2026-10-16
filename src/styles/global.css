@@ -40,6 +40,8 @@ a:hover { text-decoration-thickness: 2px; }
 
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 2px; }
 
+::selection { background: var(--mint); color: var(--on-mint); }
+
 .container {
   width: 100%;
   max-width: calc(var(--container) + 2 * var(--gutter));
@@ -97,6 +99,34 @@ a:hover { text-decoration-thickness: 2px; }
 .btn:hover { background: var(--ink); color: var(--paper); }
 .btn--primary { background: var(--mint); color: var(--on-mint); border-color: var(--on-mint); }
 .btn--primary:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+/* contorno menta: o texto usa --accent-text porque a menta pura sobre fundo claro não se lê (1,2:1) */
+.btn--outline { border: 2px solid var(--accent-text); color: var(--accent-text); }
+.btn--outline:hover { background: var(--mint); color: var(--on-mint); border-color: var(--mint); }
+
+/*
+ * Fundo texturado dos topos de página (hero da Home e Percurso): ondas de linhas finas a desvanecer para baixo.
+ * O SVG (gerado por scripts/generate-wave-lines.mjs) é só uma máscara; a cor vem do tema (--accent-text).
+ */
+.texture { position: relative; isolation: isolate; }
+.texture::before {
+  content: "";
+  position: absolute;
+  inset: -6rem 0 0;
+  z-index: -1;
+  background: var(--accent-text);
+  opacity: var(--texture-opacity);
+  -webkit-mask-image: url("/textures/wave-lines.svg"), linear-gradient(to bottom, #000 40%, transparent);
+  -webkit-mask-size: cover, 100% 100%;
+  -webkit-mask-position: center top, 0 0;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-image: url("/textures/wave-lines.svg"), linear-gradient(to bottom, #000 40%, transparent);
+  mask-size: cover, 100% 100%;
+  mask-position: center top, 0 0;
+  mask-repeat: no-repeat;
+  mask-composite: intersect;
+  pointer-events: none;
+}
 
 .section { padding-block: var(--space-8); }
 .section + .section { border-top: 1px solid var(--line); }
@@ -128,6 +158,10 @@ a:hover { text-decoration-thickness: 2px; }
   padding-inline: 0.08em;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
 }
 
 @media (prefers-reduced-motion: reduce) {
