@@ -70,6 +70,11 @@ describe('visitante sem sessão (anon)', () => {
     expect(error).toBeTruthy();
   });
 
+  it('não vê nem dispara a publicação automática', async () => {
+    expect((await anon.rpc('site_sync_status')).error).toBeTruthy();
+    expect((await anon.rpc('sync_site')).error).toBeTruthy();
+  });
+
   it('não consegue criar conta (registo público desligado)', async () => {
     const { error } = await anon.auth.signUp({ email: `intruso-${Date.now()}@example.com`, password: `Intruso-${randomUUID()}` });
     expect(error).toBeTruthy();
@@ -123,6 +128,16 @@ describe('admin com MFA (aal2)', () => {
   it('continua sem poder chamar a exportação do build', async () => {
     const { error } = await user.rpc('export_published_content');
     expect(error).toBeTruthy();
+  });
+
+  it('vê o estado da publicação automática, mas não a dispara nem mexe no estado', async () => {
+    const { data, error } = await user.rpc('site_sync_status');
+    expect(error).toBeNull();
+    expect(typeof (data as { pending: unknown }).pending).toBe('boolean');
+    expect((await user.rpc('sync_site')).error).toBeTruthy();
+    expect((await user.rpc('published_content_hash')).error).toBeTruthy();
+    const { data: rows } = await user.from('site_sync').select('id');
+    expect(rows ?? []).toHaveLength(0);
   });
 
   it('não se consegue promover nem promover outros a admin', async () => {

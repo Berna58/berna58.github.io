@@ -40,13 +40,12 @@ export async function requireAdmin(request: Request): Promise<Response | null> {
 }
 
 /**
- * Configuração do Vercel (segredos da Edge Function):
- *  - VERCEL_DEPLOY_HOOK_URL: obrigatório para publicar (Vercel > Project > Settings > Git > Deploy Hooks).
- *  - VERCEL_TOKEN + VERCEL_PROJECT_ID (+ VERCEL_TEAM_ID): opcionais, só para mostrar o estado do último deploy.
+ * Configuração do Vercel (segredos da Edge Function), opcional, só para mostrar o estado do último deploy:
+ * VERCEL_TOKEN + VERCEL_PROJECT_ID (+ VERCEL_TEAM_ID). A publicação em si é automática, na base de dados
+ * (job site_sync, com o Deploy Hook no Vault).
  */
 export function vercelConfig() {
   return {
-    deployHook: Deno.env.get('VERCEL_DEPLOY_HOOK_URL') ?? '',
     token: Deno.env.get('VERCEL_TOKEN') ?? '',
     projectId: Deno.env.get('VERCEL_PROJECT_ID') ?? '',
     teamId: Deno.env.get('VERCEL_TEAM_ID') ?? '',

@@ -5,12 +5,16 @@ Decisões de fundo: [ADR 0001](adr/0001-arquitetura.md), [0002](adr/0002-seguran
 
 ## Como funciona a publicação
 
-1. Editas no painel (`/admin/`) e carregas em **Publicar alterações no site**.
-2. A Edge Function `trigger-build` (só aceita admin com MFA) chama o **Deploy Hook** do Vercel.
+1. Editas no painel (`/admin/`) e guardas. Não há botão para publicar o site.
+2. Na base de dados, um job do `pg_cron` (a cada 30 s) compara a impressão digital do conteúdo publicado com a do último deploy.
+   Quando muda e fica estável ~30 s (paraste de gravar), chama o **Deploy Hook** do Vercel com o `pg_net`.
+   Rascunhos não contam; várias gravações seguidas dão um só deploy.
 3. O Vercel corre `npm run build`: exporta o conteúdo publicado do Supabase, descarrega as imagens, valida tudo e gera o site.
-4. Cerca de 1 a 3 minutos depois, a versão nova está online.
+4. Cerca de 1 a 3 minutos depois de guardares, a versão nova está online. A barra de topo do painel mostra o estado.
 
 Se a validação falhar, o deploy falha e a versão anterior continua online.
+Se o Vercel recusar o pedido, o painel mostra o erro e a base de dados volta a tentar 10 minutos depois.
+Estado e erros: `select * from public.site_sync;` e `select * from cron.job_run_details order by start_time desc limit 5;`.
 Cada push para o GitHub também gera um deploy (produção no ramo `main`, pré-visualização nos outros).
 
 ## Preparação (uma vez)
@@ -32,7 +36,7 @@ Cada push para o GitHub também gera um deploy (produção no ramo `main`, pré-
    ```bash
    supabase login
    supabase link --project-ref <ref>
-   supabase db push            # aplica as 5 migrações de supabase/migrations
+   supabase db push            # aplica as migrações de supabase/migrations
    ```
 3. **Authentication › Sign In / Providers:** desliga *Allow new users to sign up*. Mantém o fornecedor *Email* ligado (sem ele não há login).
 4. **Authentication › Multi-Factor:** ativa *TOTP (App Authenticator)*.
@@ -49,19 +53,25 @@ Cada push para o GitHub também gera um deploy (produção no ramo `main`, pré-
 
 Só existe um projeto Supabase (produção). Os testes que criam utilizadores (`npm run test:db`, `npm run test:admin`) correm **apenas** contra o Supabase local (`supabase start`), nunca contra produção.
 
-### 3. Botão "Publicar"
+### 3. Publicação automática
 
 1. Vercel › Settings › Git › **Deploy Hooks**: cria um hook para o ramo `main` (nome: `painel`). Copia o endereço; é secreto.
-2. Publica as Edge Functions e guarda o hook como segredo:
-   ```bash
-   supabase functions deploy trigger-build build-status --project-ref <ref>
-   supabase secrets set VERCEL_DEPLOY_HOOK_URL=<endereço do hook> --project-ref <ref>
+2. Guarda-o no Vault da base de dados (Supabase › **SQL Editor**):
+   ```sql
+   select vault.create_secret('<endereço do hook>', 'vercel_deploy_hook_url', 'Deploy Hook do Vercel (ramo main)');
    ```
-3. Opcional, para o painel mostrar o estado do deploy: cria um token em Vercel › Account Settings › Tokens (âmbito só da equipa do projeto, validade 1 ano) e:
+   Para o trocar: `select vault.update_secret((select id from vault.secrets where name = 'vercel_deploy_hook_url'), '<novo endereço>');`
+3. Publica a Edge Function do estado (e, se ainda existir de uma versão anterior, apaga a `trigger-build`):
+   ```bash
+   supabase functions deploy build-status --project-ref <ref>
+   supabase functions delete trigger-build --project-ref <ref>
+   supabase secrets unset VERCEL_DEPLOY_HOOK_URL --project-ref <ref>
+   ```
+4. Opcional, para o painel mostrar o estado do deploy: cria um token em Vercel › Account Settings › Tokens (âmbito só da equipa do projeto, validade 1 ano) e:
    ```bash
    supabase secrets set VERCEL_TOKEN=<token> VERCEL_PROJECT_ID=<id do projeto> VERCEL_TEAM_ID=<id da equipa> --project-ref <ref>
    ```
-4. Se usares outro domínio, define `ALLOWED_ORIGINS` (por exemplo `https://o-teu-dominio.pt`).
+5. Se usares outro domínio, define `ALLOWED_ORIGINS` (por exemplo `https://o-teu-dominio.pt`).
 
 ### 4. Backups semanais (GitHub Actions para repositório privado)
 
