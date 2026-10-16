@@ -1,22 +1,11 @@
 /**
- * Painel de administração: autenticação (palavra-passe + autenticador TOTP), estrutura e publicação.
+ * Painel de administração: autenticação (palavra-passe + autenticador TOTP).
  * Fluxo de entrada: login -> registar ou confirmar o autenticador -> confirmar que a conta é admin.
+ * Depois de entrar, a estrutura do painel e a publicação vivem em shell.tsx.
  */
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { supabase, isConfigured, describeError } from './lib/supabase';
-import { useHashRoute, navigate } from './lib/router';
-import { triggerBuild, buildStatus, type BuildState } from './lib/projects';
-import { ProjectList, ProjectEditor } from './projects';
-import { ProfileSection, PathSection, TaxonomySection, LinksSection, CvSeoSection } from './content';
-
-const SECTIONS = [
-  ['projetos', 'Projetos'],
-  ['perfil', 'Perfil'],
-  ['percurso', 'Percurso'],
-  ['taxonomias', 'Categorias e tecnologias'],
-  ['ligacoes', 'Ligações'],
-  ['cv-seo', 'CV e SEO'],
-] as const;
+import { Shell } from './shell';
 
 type Gate = 'loading' | 'login' | 'enroll' | 'verify' | 'forbidden' | 'ready';
 
@@ -93,7 +82,7 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
     <main className="adm-auth">
       <section className="adm-card" aria-labelledby="auth-title">
-        <p className="eyebrow">Painel do portefólio</p>
+        <p className="adm-auth-brand"><span className="adm-brand-mark" aria-hidden="true">B</span> Painel do portefólio</p>
         <h1 id="auth-title">{title}</h1>
         {children}
       </section>
@@ -245,123 +234,4 @@ function useIdleLogout(active: boolean, onLogout: () => void) {
       events.forEach((e) => window.removeEventListener(e, reset));
     };
   }, [active, onLogout]);
-}
-
-// ---------- estrutura ----------
-
-function Shell({ email }: { email: string }) {
-  const route = useHashRoute();
-  const section = route[0] ?? 'projetos';
-  const id = route[1];
-
-  return (
-    <div className="adm">
-      <header className="adm-header">
-        <div className="adm-header-inner">
-          <a className="adm-brand" href="#/projetos">Painel</a>
-          <nav aria-label="Secções do painel">
-            {SECTIONS.map(([key, label]) => (
-              <a key={key} href={`#/${key}`} aria-current={section === key ? 'page' : undefined}>{label}</a>
-            ))}
-          </nav>
-          <div className="adm-header-tools">
-            <a href="/" target="_blank" rel="noopener">Ver site</a>
-            <span className="muted mono adm-email">{email}</span>
-            <button className="btn" type="button" onClick={() => supabase.auth.signOut()}>Sair</button>
-          </div>
-        </div>
-      </header>
-      <BuildBar />
-      <main id="conteudo" className="adm-main">
-        {section === 'projetos' && !id && <ProjectList />}
-        {section === 'projetos' && id && <ProjectEditor key={id} id={id === 'novo' ? null : id} onDone={() => navigate('projetos')} />}
-        {section === 'perfil' && <ProfileSection />}
-        {section === 'percurso' && <PathSection />}
-        {section === 'taxonomias' && <TaxonomySection />}
-        {section === 'ligacoes' && <LinksSection />}
-        {section === 'cv-seo' && <CvSeoSection />}
-      </main>
-    </div>
-  );
-}
-
-// ---------- publicação ----------
-
-function BuildBar() {
-  const [state, setState] = useState<BuildState | null>(null);
-  const [message, setMessage] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [sentAt, setSentAt] = useState<string | null>(null);
-  const poll = useRef<number | undefined>(undefined);
-
-  const stopPolling = () => {
-    window.clearInterval(poll.current);
-    poll.current = undefined;
-  };
-
-  const refresh = useCallback(async () => {
-    try {
-      const next = await buildStatus();
-      setState(next);
-      // 'unknown' = sem token do Vercel para consultar o estado: não há nada para acompanhar.
-      if (next.status === 'completed' || next.status === 'unknown') {
-        stopPolling();
-        setBusy(false);
-      }
-    } catch (error) {
-      setMessage(describeError(error));
-      stopPolling();
-      setBusy(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refresh();
-    return stopPolling;
-  }, [refresh]);
-
-  async function publish() {
-    setBusy(true);
-    setMessage('');
-    try {
-      await triggerBuild();
-      setSentAt(new Date().toISOString());
-      setState({ status: 'queued', conclusion: null, createdAt: new Date().toISOString(), url: null });
-      stopPolling();
-      poll.current = window.setInterval(() => void refresh(), 8000);
-    } catch (error) {
-      setBusy(false);
-      setMessage(describeError(error));
-    }
-  }
-
-  const time = state?.createdAt ? new Date(state.createdAt).toLocaleString('pt-PT', { dateStyle: 'short', timeStyle: 'short' }) : '';
-  let label = sentAt
-    ? `Pedido enviado ao Vercel às ${new Date(sentAt).toLocaleTimeString('pt-PT', { timeStyle: 'short' })}. O site atualiza em 1 a 3 minutos.`
-    : 'Quando acabares as alterações, publica-as no site.';
-  let tone = sentAt ? 'ok' : 'neutral';
-  if (state?.status === 'queued' || state?.status === 'in_progress') {
-    label = 'A publicar… o site atualiza em 1 a 3 minutos.';
-    tone = 'progress';
-  } else if (state?.status === 'completed' && state.conclusion === 'success') {
-    label = `Última publicação concluída (${time}).`;
-    tone = 'ok';
-  } else if (state?.status === 'completed') {
-    label = `A última publicação falhou (${time}). O site anterior continua online.`;
-    tone = 'fail';
-  }
-
-  return (
-    <div className="adm-buildbar">
-      <div className="adm-buildbar-inner">
-        <p className={`adm-build adm-build--${tone}`} role="status" aria-live="polite">
-          {label} {state?.url && <a href={state.url} target="_blank" rel="noopener">Ver detalhes</a>}
-        </p>
-        {message && <p className="adm-error" role="alert">{message}</p>}
-        <button className="btn btn--primary" type="button" onClick={publish} disabled={busy}>
-          {busy ? 'A publicar…' : 'Publicar alterações no site'}
-        </button>
-      </div>
-    </div>
-  );
 }

@@ -2,13 +2,15 @@
  * Lista e editor de projetos.
  * O editor guarda tudo numa transação (save_project); publicar passa pelas regras da base de dados.
  */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { describeError } from './lib/supabase';
+import { setUnsavedChanges } from './lib/router';
 import {
   LOCALES, emptyProject, listProjects, loadProject, loadTaxonomies, saveProject, setStatus, moveProject,
   deleteProject, uploadImage, draftErrors, publishProblems,
   type ProjectForm, type ProjectRow, type Status, type Taxonomies, type TextFields, type MediaItem,
 } from './lib/projects';
+import { Dialog, EmptyState, Field, Fieldset, Icon, LoadingState, NoticeLine, PageHeader, useConfirm, useCrumb } from './ui';
 import CaseStudy from '@/shared/CaseStudy';
 import Showcase from '@/shared/Showcase';
 import type { Locale } from '@/lib/content/schema';
@@ -21,7 +23,7 @@ const STATE_LABEL: Record<string, string> = {
 };
 const GROUP_LABEL: Record<string, string> = { backend: 'Backend', frontend: 'Frontend', data: 'Dados', design: 'Design', tools: 'Ferramentas' };
 
-function StatusBadge({ status }: { status: Status }) {
+export function StatusBadge({ status }: { status: Status }) {
   return <span className={`adm-badge adm-badge--${status}`}>{STATUS_LABEL[status]}</span>;
 }
 
@@ -71,27 +73,34 @@ export function ProjectList() {
 
   return (
     <section className="adm-section" aria-labelledby="list-title">
-      <div className="adm-section-head">
-        <h1 id="list-title">Projetos</h1>
-        <a className="btn btn--primary" href="#/projetos/novo">Novo projeto</a>
-      </div>
-      <p className="muted">A ordem desta lista é a ordem do site. Os projetos marcados como destaque aparecem na página inicial (até 3).</p>
+      <PageHeader
+        title="Projetos"
+        titleId="list-title"
+        description="A ordem desta lista é a ordem do site. Os projetos marcados como destaque aparecem primeiro no carrossel da página inicial; com menos de 3, o carrossel completa-se com os restantes."
+        actions={<a className="btn btn--primary" href="#/projetos/novo"><Icon name="plus" />Novo projeto</a>}
+      />
 
       <div className="adm-tabs" role="group" aria-label="Filtrar por estado">
         {(['all', 'published', 'draft', 'unpublished'] as const).map((key) => (
           <button key={key} type="button" className="adm-chip" aria-pressed={filter === key} onClick={() => setFilter(key)}>
-            {key === 'all' ? 'Todos' : STATUS_LABEL[key]} <span className="mono">{counts[key]}</span>
+            {key === 'all' ? 'Todos' : STATUS_LABEL[key]} <span className="adm-count">{counts[key]}</span>
           </button>
         ))}
       </div>
 
-      {error && <p className="adm-error" role="alert">{error}</p>}
+      {error && <NoticeLine notice={{ tone: 'error', text: error }} />}
       <p ref={liveRef} className="visually-hidden" role="status" aria-live="polite"></p>
 
       {!rows ? (
-        <p className="muted">A carregar…</p>
+        !error && <LoadingState rows={4} />
+      ) : rows.length === 0 ? (
+        <EmptyState title="Ainda não há projetos." action={<a className="btn" href="#/projetos/novo">Criar o primeiro projeto</a>}>
+          Cada projeto começa como rascunho e só aparece no site depois de publicado.
+        </EmptyState>
       ) : visible.length === 0 ? (
-        <p className="muted">Não há projetos neste estado.</p>
+        <EmptyState title="Não há projetos neste estado.">
+          <button type="button" className="adm-linkbtn" onClick={() => setFilter('all')}>Mostrar todos</button>
+        </EmptyState>
       ) : (
         <ol className="adm-list">
           {visible.map((row) => {
@@ -107,9 +116,9 @@ export function ProjectList() {
                   {row.featured && <span className="adm-badge adm-badge--featured">Destaque</span>}
                 </div>
                 <div className="adm-row-actions">
-                  <button type="button" className="btn adm-icon" disabled={index === 0 || busyId !== ''} onClick={() => move(row, -1)} aria-label={`Subir ${row.title}`}>↑</button>
-                  <button type="button" className="btn adm-icon" disabled={index === rows.length - 1 || busyId !== ''} onClick={() => move(row, 1)} aria-label={`Descer ${row.title}`}>↓</button>
-                  <a className="btn" href={`#/projetos/${row.id}`}>Editar</a>
+                  <button type="button" className="btn btn--quiet adm-icon" disabled={index === 0 || busyId !== ''} onClick={() => move(row, -1)} aria-label={`Subir ${row.title}`}><Icon name="up" /></button>
+                  <button type="button" className="btn btn--quiet adm-icon" disabled={index === rows.length - 1 || busyId !== ''} onClick={() => move(row, 1)} aria-label={`Descer ${row.title}`}><Icon name="down" /></button>
+                  <a className="btn btn--quiet" href={`#/projetos/${row.id}`}><Icon name="edit" />Editar</a>
                 </div>
               </li>
             );
@@ -140,6 +149,8 @@ export function ProjectEditor({ id, onDone }: { id: string | null; onDone: () =>
   const [preview, setPreview] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const slugTouched = useRef(Boolean(id));
+  const confirm = useConfirm();
+  useCrumb(form ? form.translations.pt.title || 'Novo projeto' : null);
 
   useEffect(() => {
     (async () => {
@@ -158,18 +169,22 @@ export function ProjectEditor({ id, onDone }: { id: string | null; onDone: () =>
 
   const dirty = form !== null && JSON.stringify(form) !== saved;
 
-  // Aviso ao fechar o separador com alterações por guardar.
+  // Aviso ao fechar o separador (browser) ou ao seguir uma ligação do painel (shell) com alterações por guardar.
   useEffect(() => {
+    setUnsavedChanges(dirty);
     if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => event.preventDefault();
     window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
+    return () => {
+      window.removeEventListener('beforeunload', warn);
+      setUnsavedChanges(false);
+    };
   }, [dirty]);
 
   if (!form || !tax) {
     return (
       <section className="adm-section">
-        {message ? <p className="adm-error" role="alert">{message.text}</p> : <p className="muted">A carregar…</p>}
+        {message ? <NoticeLine notice={message} /> : <LoadingState rows={6} label="A carregar o projeto…" />}
       </section>
     );
   }
@@ -186,8 +201,17 @@ export function ProjectEditor({ id, onDone }: { id: string | null; onDone: () =>
   const text = current.translations[locale];
   const isCase = current.kind === 'case_study';
 
-  function leave() {
-    if (dirty && !window.confirm('Há alterações por guardar. Sair mesmo assim?')) return;
+  async function leave() {
+    if (dirty) {
+      const ok = await confirm({
+        title: 'Sair sem guardar?',
+        message: 'Há alterações por guardar neste projeto. Se saíres agora, perdem-se.',
+        confirmLabel: 'Sair sem guardar',
+        danger: true,
+      });
+      if (!ok) return;
+      setUnsavedChanges(false);
+    }
     onDone();
   }
 
@@ -205,7 +229,7 @@ export function ProjectEditor({ id, onDone }: { id: string | null; onDone: () =>
       const next = { ...current, id: newId };
       setForm(next);
       setSaved(JSON.stringify(next));
-      setMessage({ tone: 'ok', text: 'Guardado. Usa "Publicar alterações no site" para atualizar o site.' });
+      setMessage({ tone: 'ok', text: current.status === 'published' ? 'Guardado. O site atualiza sozinho dentro de 1 a 3 minutos.' : 'Guardado.' });
       if (!current.id) window.history.replaceState(null, '', `#/projetos/${newId}`);
       return newId;
     } catch (e) {
@@ -229,8 +253,8 @@ export function ProjectEditor({ id, onDone }: { id: string | null; onDone: () =>
         tone: 'ok',
         text:
           status === 'published'
-            ? 'Projeto publicado. Usa "Publicar alterações no site" para o pôr online.'
-            : 'Projeto despublicado. Sai do site na próxima publicação.',
+            ? 'Projeto publicado. Aparece no site dentro de 1 a 3 minutos.'
+            : 'Projeto despublicado. Sai do site dentro de 1 a 3 minutos.',
       });
     } catch (e) {
       setMessage({ tone: 'error', text: describeError(e) });
@@ -257,33 +281,35 @@ export function ProjectEditor({ id, onDone }: { id: string | null; onDone: () =>
 
   return (
     <section className="adm-section adm-editor" aria-labelledby="editor-title">
-      <div className="adm-section-head">
-        <div>
-          <button type="button" className="adm-back" onClick={leave}>Voltar à lista</button>
-          <h1 id="editor-title">{current.translations.pt.title || 'Novo projeto'}</h1>
-          <p className="adm-editor-status">
+      <PageHeader
+        sticky
+        title={current.translations.pt.title || 'Novo projeto'}
+        titleId="editor-title"
+        before={<button type="button" className="adm-back" onClick={() => void leave()}><Icon name="left" />Voltar à lista</button>}
+        meta={
+          <>
             <StatusBadge status={current.status} />
             {dirty && <span className="adm-badge adm-badge--dirty">Alterações por guardar</span>}
-          </p>
-        </div>
-        <div className="adm-actions">
-          <button type="button" className="btn" onClick={() => setPreview(true)}>Pré-visualizar</button>
-          <button type="button" className="btn" onClick={() => void save()} disabled={busy || !dirty}>Guardar</button>
-          {current.status === 'published' ? (
-            <button type="button" className="btn" onClick={() => void changeStatus('unpublished')} disabled={busy}>Despublicar</button>
-          ) : (
-            <button type="button" className="btn btn--primary" onClick={() => void changeStatus('published')} disabled={busy || problems.length > 0}>Publicar</button>
-          )}
-        </div>
-      </div>
-
-      {message && (
-        <p className={message.tone === 'ok' ? 'adm-ok' : 'adm-error'} role={message.tone === 'ok' ? 'status' : 'alert'}>{message.text}</p>
-      )}
+          </>
+        }
+        actions={
+          <>
+            <button type="button" className="btn btn--quiet" onClick={() => setPreview(true)}><Icon name="eye" />Pré-visualizar</button>
+            <button type="button" className="btn" onClick={() => void save()} disabled={busy || !dirty}>{busy ? 'A guardar…' : 'Guardar'}</button>
+            {current.status === 'published' ? (
+              <button type="button" className="btn" onClick={() => void changeStatus('unpublished')} disabled={busy}>Despublicar</button>
+            ) : (
+              <button type="button" className="btn btn--primary" onClick={() => void changeStatus('published')} disabled={busy || problems.length > 0}>Publicar</button>
+            )}
+          </>
+        }
+      >
+        <NoticeLine notice={message} />
+      </PageHeader>
 
       {problems.length > 0 && (
         <div className="adm-problems" role="region" aria-labelledby="problems-title">
-          <h2 id="problems-title">Para publicar, falta</h2>
+          <h2 id="problems-title"><Icon name="warning" />Para publicar, falta</h2>
           <ul>{problems.map((p) => <li key={p}>{p}</li>)}</ul>
           <p className="muted">Podes guardar como rascunho a qualquer momento.</p>
         </div>
@@ -450,9 +476,11 @@ export function ProjectEditor({ id, onDone }: { id: string | null; onDone: () =>
         </div>
 
         <div className="adm-span adm-danger">
-          <h2>Eliminar projeto</h2>
-          <p className="muted">Apaga o projeto e os textos. Não pode ser desfeito.</p>
-          <button type="button" className="btn adm-btn-danger" onClick={() => setConfirmDelete(true)} disabled={busy}>Eliminar…</button>
+          <div>
+            <h2>Eliminar projeto</h2>
+            <p className="muted">Apaga o projeto e os textos. Não pode ser desfeito.</p>
+          </div>
+          <button type="button" className="btn adm-btn-danger" onClick={() => setConfirmDelete(true)} disabled={busy}><Icon name="trash" />Eliminar…</button>
         </div>
       </form>
 
@@ -470,26 +498,6 @@ export function ProjectEditor({ id, onDone }: { id: string | null; onDone: () =>
 }
 
 // ---------- componentes de formulário ----------
-
-export function Fieldset({ legend, children }: { legend: string; children: ReactNode }) {
-  return (
-    <fieldset className="adm-fieldset">
-      <legend>{legend}</legend>
-      {children}
-    </fieldset>
-  );
-}
-
-export function Field({ label, hint, error, children }: { label: string; hint?: string; error?: string; children: ReactNode }) {
-  return (
-    <label className={`adm-field${error ? ' adm-field--error' : ''}`}>
-      <span>{label}</span>
-      {children}
-      {hint && <small className="adm-hint">{hint}</small>}
-      {error && <small className="adm-error" role="alert">{error}</small>}
-    </label>
-  );
-}
 
 export function ListEditor<T extends Record<string, string>>({ label, items, fields, onChange }: {
   label: string;
@@ -518,13 +526,14 @@ export function ListEditor<T extends Record<string, string>>({ label, items, fie
             </label>
           ))}
           <div className="adm-actions">
-            <button type="button" className="btn adm-icon" disabled={index === 0} onClick={() => move(index, -1)} aria-label={`Subir ${itemName} ${index + 1}`}>↑</button>
-            <button type="button" className="btn adm-icon" disabled={index === items.length - 1} onClick={() => move(index, 1)} aria-label={`Descer ${itemName} ${index + 1}`}>↓</button>
-            <button type="button" className="btn" onClick={() => onChange(items.filter((_, i) => i !== index))}>Remover</button>
+            <button type="button" className="btn btn--quiet adm-icon" disabled={index === 0} onClick={() => move(index, -1)} aria-label={`Subir ${itemName} ${index + 1}`}><Icon name="up" /></button>
+            <button type="button" className="btn btn--quiet adm-icon" disabled={index === items.length - 1} onClick={() => move(index, 1)} aria-label={`Descer ${itemName} ${index + 1}`}><Icon name="down" /></button>
+            <button type="button" className="btn btn--quiet" onClick={() => onChange(items.filter((_, i) => i !== index))}><Icon name="trash" />Remover</button>
           </div>
         </div>
       ))}
-      <button type="button" className="btn" onClick={() => onChange([...items, blank()])}>Adicionar</button>
+      {items.length === 0 && <p className="adm-hint">Ainda não há itens.</p>}
+      <div><button type="button" className="btn btn--quiet" onClick={() => onChange([...items, blank()])}><Icon name="plus" />Adicionar</button></div>
     </div>
   );
 }
@@ -577,12 +586,12 @@ export function MediaField({ label, items, multiple, onChange }: { label: string
               <p className="adm-hint">{item.alt.pt}</p>
               <div className="adm-actions">
                 {multiple && (
-                  <button type="button" className="btn adm-icon" disabled={index === 0} onClick={() => move(index, -1)} aria-label={`Mover imagem ${index + 1} para trás`}>←</button>
+                  <button type="button" className="btn btn--quiet adm-icon" disabled={index === 0} onClick={() => move(index, -1)} aria-label={`Mover imagem ${index + 1} para trás`}><Icon name="left" /></button>
                 )}
                 {multiple && (
-                  <button type="button" className="btn adm-icon" disabled={index === items.length - 1} onClick={() => move(index, 1)} aria-label={`Mover imagem ${index + 1} para a frente`}>→</button>
+                  <button type="button" className="btn btn--quiet adm-icon" disabled={index === items.length - 1} onClick={() => move(index, 1)} aria-label={`Mover imagem ${index + 1} para a frente`}><Icon name="right" /></button>
                 )}
-                <button type="button" className="btn" onClick={() => onChange(items.filter((_, i) => i !== index))}>Remover</button>
+                <button type="button" className="btn btn--quiet" onClick={() => onChange(items.filter((_, i) => i !== index))}><Icon name="trash" />Remover</button>
               </div>
             </li>
           ))}
@@ -604,7 +613,7 @@ export function MediaField({ label, items, multiple, onChange }: { label: string
             <input id={`media-alt-en-${key}`} value={alt.en} onChange={(e) => setAlt({ ...alt, en: e.target.value })} />
           </label>
           {error && <p className="adm-error" role="alert">{error}</p>}
-          <button type="button" className="btn" onClick={() => void upload()} disabled={busy}>{busy ? 'A enviar…' : 'Carregar imagem'}</button>
+          <div><button type="button" className="btn" onClick={() => void upload()} disabled={busy}><Icon name="upload" />{busy ? 'A enviar…' : 'Carregar imagem'}</button></div>
         </div>
       )}
     </div>
@@ -613,22 +622,6 @@ export function MediaField({ label, items, multiple, onChange }: { label: string
 
 // ---------- diálogos ----------
 
-function Dialog({ title, onClose, children, wide = false }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    ref.current?.showModal();
-  }, []);
-  return (
-    <dialog ref={ref} className={`adm-dialog${wide ? ' adm-dialog--wide' : ''}`} aria-labelledby="dialog-title" onClose={onClose}>
-      <div className="adm-dialog-head">
-        <h2 id="dialog-title">{title}</h2>
-        <button type="button" className="btn" onClick={() => ref.current?.close()}>Fechar</button>
-      </div>
-      {children}
-    </dialog>
-  );
-}
-
 function ConfirmDelete({ slug, onCancel, onConfirm }: { slug: string; onCancel: () => void; onConfirm: () => void }) {
   const [typed, setTyped] = useState('');
   return (
@@ -636,9 +629,9 @@ function ConfirmDelete({ slug, onCancel, onConfirm }: { slug: string; onCancel: 
       <p>Para confirmar, escreve <code>{slug}</code>. Esta ação não pode ser desfeita.</p>
       <label className="adm-field">
         <span>Endereço do projeto</span>
-        <input id="confirm-slug" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" />
+        <input id="confirm-slug" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" data-autofocus />
       </label>
-      <div className="adm-actions">
+      <div className="adm-actions adm-dialog-actions">
         <button type="button" className="btn" onClick={onCancel}>Cancelar</button>
         <button type="button" className="btn adm-btn-danger" disabled={typed !== slug} onClick={onConfirm}>Eliminar definitivamente</button>
       </div>

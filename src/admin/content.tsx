@@ -5,7 +5,8 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { supabase, describeError } from './lib/supabase';
 import { LOCALES, withSignedUrls, type MediaItem } from './lib/projects';
-import { Field, Fieldset, ListEditor, MediaField } from './projects';
+import { ListEditor, MediaField } from './projects';
+import { EmptyState, Field, Fieldset, Icon, LoadingState, NoticeLine, PageHeader, SubHeader, useConfirm, type Notice } from './ui';
 import type { Locale } from '@/lib/content/schema';
 
 const YEAR_MONTH = /^\d{4}(-(0[1-9]|1[0-2]))?$/;
@@ -25,13 +26,6 @@ const toMedia = (m: MediaRow): MediaItem => ({
 
 // ---------- peças comuns ----------
 
-type Notice = { tone: 'ok' | 'error'; text: string } | null;
-
-function NoticeLine({ notice }: { notice: Notice }) {
-  if (!notice) return null;
-  return <p className={notice.tone === 'ok' ? 'adm-ok' : 'adm-error'} role={notice.tone === 'ok' ? 'status' : 'alert'}>{notice.text}</p>;
-}
-
 function LangTabs({ locale, onChange }: { locale: Locale; onChange: (l: Locale) => void }) {
   return (
     <div className="adm-langs" role="group" aria-label="Idioma dos textos">
@@ -45,22 +39,34 @@ function LangTabs({ locale, onChange }: { locale: Locale; onChange: (l: Locale) 
 function Section({ title, intro, children }: { title: string; intro?: string; children: ReactNode }) {
   return (
     <section className="adm-section" aria-labelledby="section-title">
-      <h1 id="section-title">{title}</h1>
-      {intro && <p className="muted">{intro}</p>}
+      <PageHeader title={title} titleId="section-title" description={intro} />
       {children}
     </section>
   );
 }
 
-const savedMessage: Notice = { tone: 'ok', text: 'Guardado. Usa "Publicar alterações no site" para atualizar o site.' };
+/** Enquanto não há dados: o erro, se houver, ou linhas-esqueleto. */
+function Pending({ notice }: { notice: Notice }) {
+  return notice ? <NoticeLine notice={notice} /> : <LoadingState rows={4} />;
+}
+
+const savedMessage: Notice = { tone: 'ok', text: 'Guardado. O site atualiza sozinho dentro de 1 a 3 minutos.' };
 
 function OrderButtons({ label, first, last, onMove }: { label: string; first: boolean; last: boolean; onMove: (d: -1 | 1) => void }) {
   return (
     <>
-      <button type="button" className="btn adm-icon" disabled={first} onClick={() => onMove(-1)} aria-label={`Subir ${label}`}>↑</button>
-      <button type="button" className="btn adm-icon" disabled={last} onClick={() => onMove(1)} aria-label={`Descer ${label}`}>↓</button>
+      <button type="button" className="btn btn--quiet adm-icon" disabled={first} onClick={() => onMove(-1)} aria-label={`Subir ${label}`}><Icon name="up" /></button>
+      <button type="button" className="btn btn--quiet adm-icon" disabled={last} onClick={() => onMove(1)} aria-label={`Descer ${label}`}><Icon name="down" /></button>
     </>
   );
+}
+
+function DeleteButton({ onClick }: { onClick: () => void }) {
+  return <button type="button" className="btn adm-btn-danger" onClick={onClick}><Icon name="trash" />Eliminar</button>;
+}
+
+function EditButton({ onClick }: { onClick: () => void }) {
+  return <button type="button" className="btn btn--quiet" onClick={onClick}><Icon name="edit" />Editar</button>;
 }
 
 type Result = PromiseLike<{ error: unknown }>;
@@ -105,7 +111,7 @@ export function ProfileSection() {
     })();
   }, []);
 
-  if (!form) return <Section title="Perfil"><NoticeLine notice={notice} />{!notice && <p className="muted">A carregar…</p>}</Section>;
+  if (!form) return <Section title="Perfil"><Pending notice={notice} /></Section>;
   const current = form;
   const t = current.translations[locale];
   const setText = (patch: Partial<ProfileText>) => setForm({ ...current, translations: { ...current.translations, [locale]: { ...t, ...patch } } });
@@ -195,7 +201,7 @@ export function ProfileSection() {
             />
           </Fieldset>
         </div>
-        <div className="adm-span"><button className="btn btn--primary" type="submit">Guardar perfil</button></div>
+        <div className="adm-span adm-form-footer"><button className="btn btn--primary" type="submit">Guardar perfil</button></div>
       </form>
     </Section>
   );
@@ -239,6 +245,7 @@ export function PathSection() {
   const [technologies, setTechnologies] = useState<{ id: string; name: string }[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice>(null);
+  const confirm = useConfirm();
 
   async function reload() {
     const [exp, edu, tech] = await Promise.all([
@@ -291,7 +298,11 @@ export function PathSection() {
     await reload();
   }
 
-  if (!experiences || !education) return <Section title="Percurso"><NoticeLine notice={notice} />{!notice && <p className="muted">A carregar…</p>}</Section>;
+  if (!experiences || !education) return <Section title="Percurso"><Pending notice={notice} /></Section>;
+
+  async function remove(table: 'experiences' | 'education', id: string, title: string, message: string) {
+    if (await confirm({ title, message, confirmLabel: 'Eliminar', danger: true })) void run(() => supabase.from(table).delete().eq('id', id));
+  }
 
   const blankExp = (): ExpForm => ({
     id: '', organization: '', org_url: '', employment_type: 'full_time', start_date: '', end_date: '', technology_ids: [],
@@ -302,53 +313,59 @@ export function PathSection() {
   return (
     <Section title="Percurso" intro="Experiência e formação. A ordem aqui é a ordem do site (a mais recente primeiro).">
       <NoticeLine notice={notice} />
-      <h2>Experiência</h2>
-      <div><button type="button" className="btn" onClick={() => setEditing('new-exp')}>Adicionar experiência</button></div>
+      <SubHeader
+        title="Experiência"
+        actions={<button type="button" className="btn" onClick={() => setEditing('new-exp')} disabled={editing === 'new-exp'}><Icon name="plus" />Adicionar experiência</button>}
+      />
       {editing === 'new-exp' && <ExperienceEditor value={blankExp()} technologies={technologies} onCancel={() => setEditing(null)} onSave={(v) => void run(() => saveExperience(v))} />}
-      <ol className="adm-list">
-        {experiences.map((e, i) => (
-          <li key={e.id} className="adm-row adm-row--stack">
-            <div className="adm-row-main">
-              <p className="adm-row-title">{e.translations.pt.role} — {e.organization}</p>
-              <p className="mono muted">{e.start_date} – {e.end_date || 'atual'}</p>
-            </div>
-            <div className="adm-row-actions">
-              <OrderButtons label={e.organization} first={i === 0} last={i === experiences.length - 1}
-                onMove={(d) => void run(() => supabase.rpc('move_item', { item_table: 'experiences', item_id: e.id, direction: d }), null)} />
-              <button type="button" className="btn" onClick={() => setEditing(e.id)}>Editar</button>
-              <button type="button" className="btn adm-btn-danger"
-                onClick={() => { if (window.confirm(`Eliminar a experiência em ${e.organization}?`)) void run(() => supabase.from('experiences').delete().eq('id', e.id)); }}>
-                Eliminar
-              </button>
-            </div>
-            {editing === e.id && <ExperienceEditor value={e} technologies={technologies} onCancel={() => setEditing(null)} onSave={(v) => void run(() => saveExperience(v))} />}
-          </li>
-        ))}
-      </ol>
+      {experiences.length === 0 && editing !== 'new-exp' ? (
+        <EmptyState title="Ainda não há experiência.">A página Percurso mostra-a da mais recente para a mais antiga.</EmptyState>
+      ) : (
+        <ol className="adm-list">
+          {experiences.map((e, i) => (
+            <li key={e.id} className="adm-row adm-row--stack">
+              <div className="adm-row-main">
+                <p className="adm-row-title">{e.translations.pt.role} — {e.organization}</p>
+                <p className="mono muted">{e.start_date} – {e.end_date || 'atual'}</p>
+              </div>
+              <div className="adm-row-actions">
+                <OrderButtons label={e.organization} first={i === 0} last={i === experiences.length - 1}
+                  onMove={(d) => void run(() => supabase.rpc('move_item', { item_table: 'experiences', item_id: e.id, direction: d }), null)} />
+                <EditButton onClick={() => setEditing(e.id)} />
+                <DeleteButton onClick={() => void remove('experiences', e.id, 'Eliminar experiência', `Eliminar a experiência em ${e.organization}? Não pode ser desfeito.`)} />
+              </div>
+              {editing === e.id && <ExperienceEditor value={e} technologies={technologies} onCancel={() => setEditing(null)} onSave={(v) => void run(() => saveExperience(v))} />}
+            </li>
+          ))}
+        </ol>
+      )}
 
-      <h2>Formação</h2>
-      <div><button type="button" className="btn" onClick={() => setEditing('new-edu')}>Adicionar formação</button></div>
+      <SubHeader
+        title="Formação"
+        actions={<button type="button" className="btn" onClick={() => setEditing('new-edu')} disabled={editing === 'new-edu'}><Icon name="plus" />Adicionar formação</button>}
+      />
       {editing === 'new-edu' && <EducationEditor value={blankEdu()} onCancel={() => setEditing(null)} onSave={(v) => void run(() => saveEducation(v))} />}
-      <ol className="adm-list">
-        {education.map((e, i) => (
-          <li key={e.id} className="adm-row adm-row--stack">
-            <div className="adm-row-main">
-              <p className="adm-row-title">{e.translations.pt.degree}</p>
-              <p className="mono muted">{e.institution} · {e.start_date} – {e.end_date || 'atual'}</p>
-            </div>
-            <div className="adm-row-actions">
-              <OrderButtons label={e.institution} first={i === 0} last={i === education.length - 1}
-                onMove={(d) => void run(() => supabase.rpc('move_item', { item_table: 'education', item_id: e.id, direction: d }), null)} />
-              <button type="button" className="btn" onClick={() => setEditing(e.id)}>Editar</button>
-              <button type="button" className="btn adm-btn-danger"
-                onClick={() => { if (window.confirm(`Eliminar a formação em ${e.institution}?`)) void run(() => supabase.from('education').delete().eq('id', e.id)); }}>
-                Eliminar
-              </button>
-            </div>
-            {editing === e.id && <EducationEditor value={e} onCancel={() => setEditing(null)} onSave={(v) => void run(() => saveEducation(v))} />}
-          </li>
-        ))}
-      </ol>
+      {education.length === 0 && editing !== 'new-edu' ? (
+        <EmptyState title="Ainda não há formação." />
+      ) : (
+        <ol className="adm-list">
+          {education.map((e, i) => (
+            <li key={e.id} className="adm-row adm-row--stack">
+              <div className="adm-row-main">
+                <p className="adm-row-title">{e.translations.pt.degree}</p>
+                <p className="mono muted">{e.institution} · {e.start_date} – {e.end_date || 'atual'}</p>
+              </div>
+              <div className="adm-row-actions">
+                <OrderButtons label={e.institution} first={i === 0} last={i === education.length - 1}
+                  onMove={(d) => void run(() => supabase.rpc('move_item', { item_table: 'education', item_id: e.id, direction: d }), null)} />
+                <EditButton onClick={() => setEditing(e.id)} />
+                <DeleteButton onClick={() => void remove('education', e.id, 'Eliminar formação', `Eliminar a formação em ${e.institution}? Não pode ser desfeito.`)} />
+              </div>
+              {editing === e.id && <EducationEditor value={e} onCancel={() => setEditing(null)} onSave={(v) => void run(() => saveEducation(v))} />}
+            </li>
+          ))}
+        </ol>
+      )}
     </Section>
   );
 }
@@ -461,6 +478,7 @@ export function TaxonomySection() {
   const [categories, setCategories] = useState<CategoryValue[] | null>(null);
   const [technologies, setTechnologies] = useState<TechValue[]>([]);
   const [notice, setNotice] = useState<Notice>(null);
+  const confirm = useConfirm();
 
   async function reload() {
     const [cat, tech] = await Promise.all([
@@ -489,12 +507,16 @@ export function TaxonomySection() {
     if (!error) await reload();
   }
 
-  if (!categories) return <Section title="Categorias e tecnologias"><NoticeLine notice={notice} /></Section>;
+  if (!categories) return <Section title="Categorias e tecnologias"><Pending notice={notice} /></Section>;
+
+  async function remove(table: 'categories' | 'technologies', id: string, title: string, message: string) {
+    if (await confirm({ title, message, confirmLabel: 'Eliminar', danger: true })) void act(() => supabase.from(table).delete().eq('id', id));
+  }
 
   return (
     <Section title="Categorias e tecnologias" intro="As categorias servem de filtro em /projetos/. As tecnologias aparecem nos projetos, no percurso e em 'Como trabalho'.">
       <NoticeLine notice={notice} />
-      <h2>Categorias</h2>
+      <SubHeader title="Categorias" />
       <ol className="adm-list">
         {categories.map((c, i) => (
           <li key={c.id} className="adm-row adm-row--stack">
@@ -502,19 +524,17 @@ export function TaxonomySection() {
             <div className="adm-row-actions">
               <OrderButtons label={c.names.pt} first={i === 0} last={i === categories.length - 1}
                 onMove={(d) => void act(() => supabase.rpc('move_item', { item_table: 'categories', item_id: c.id, direction: d }))} />
-              <button type="button" className="btn adm-btn-danger"
-                onClick={() => { if (window.confirm(`Eliminar a categoria ${c.names.pt}?`)) void act(() => supabase.from('categories').delete().eq('id', c.id)); }}>
-                Eliminar
-              </button>
+              <DeleteButton onClick={() => void remove('categories', c.id, 'Eliminar categoria', `Eliminar a categoria ${c.names.pt}? Não pode ser desfeito.`)} />
             </div>
           </li>
         ))}
-        <li className="adm-row adm-row--stack">
+        <li className="adm-row adm-row--stack adm-row--new">
+          <p className="adm-row-new-label">Nova categoria</p>
           <CategoryForm value={{ id: '', slug: '', names: { pt: '', en: '' } }} isNew onSave={(v) => void act(() => supabase.rpc('save_category', { payload: v as never }))} />
         </li>
       </ol>
 
-      <h2>Tecnologias</h2>
+      <SubHeader title="Tecnologias" />
       <ol className="adm-list">
         {technologies.map((t, i) => (
           <li key={t.id} className="adm-row adm-row--stack">
@@ -522,14 +542,12 @@ export function TaxonomySection() {
             <div className="adm-row-actions">
               <OrderButtons label={t.name} first={i === 0} last={i === technologies.length - 1}
                 onMove={(d) => void act(() => supabase.rpc('move_item', { item_table: 'technologies', item_id: t.id, direction: d }))} />
-              <button type="button" className="btn adm-btn-danger"
-                onClick={() => { if (window.confirm(`Eliminar ${t.name}? Sai também dos projetos e do percurso.`)) void act(() => supabase.from('technologies').delete().eq('id', t.id)); }}>
-                Eliminar
-              </button>
+              <DeleteButton onClick={() => void remove('technologies', t.id, 'Eliminar tecnologia', `Eliminar ${t.name}? Sai também dos projetos e do percurso.`)} />
             </div>
           </li>
         ))}
-        <li className="adm-row adm-row--stack">
+        <li className="adm-row adm-row--stack adm-row--new">
+          <p className="adm-row-new-label">Nova tecnologia</p>
           <TechForm value={{ id: '', name: '', tech_group: 'backend' }} isNew
             onSave={(v) => void act(() => supabase.from('technologies').insert({ name: v.name, tech_group: v.tech_group as never, sort_order: technologies.length + 1 }))} />
         </li>
@@ -596,6 +614,7 @@ interface LinkRow { id: string; kind: string; url: string; label: string; placem
 export function LinksSection() {
   const [links, setLinks] = useState<LinkRow[] | null>(null);
   const [notice, setNotice] = useState<Notice>(null);
+  const confirm = useConfirm();
 
   async function reload() {
     const { data, error } = await supabase.from('links').select('id, kind, url, label, placements').order('sort_order').order('id');
@@ -629,11 +648,18 @@ export function LinksSection() {
     void act(() => (v.id ? supabase.from('links').update(row).eq('id', v.id) : supabase.from('links').insert({ ...row, sort_order: (links?.length ?? 0) + 1 })));
   }
 
-  if (!links) return <Section title="Ligações"><NoticeLine notice={notice} /></Section>;
+  if (!links) return <Section title="Ligações"><Pending notice={notice} /></Section>;
+
+  async function remove(l: LinkRow) {
+    if (await confirm({ title: 'Eliminar ligação', message: `Eliminar a ligação ${l.url}? Não pode ser desfeito.`, confirmLabel: 'Eliminar', danger: true })) {
+      void act(() => supabase.from('links').delete().eq('id', l.id));
+    }
+  }
 
   return (
     <Section title="Ligações" intro="Email e redes sociais. Escolhe onde cada uma aparece no site.">
       <NoticeLine notice={notice} />
+      {links.length === 0 && <EmptyState title="Ainda não há ligações.">Acrescenta abaixo o email e as redes sociais que queres mostrar no site.</EmptyState>}
       <ol className="adm-list">
         {links.map((l, i) => (
           <li key={l.id} className="adm-row adm-row--stack">
@@ -641,14 +667,12 @@ export function LinksSection() {
             <div className="adm-row-actions">
               <OrderButtons label={l.kind} first={i === 0} last={i === links.length - 1}
                 onMove={(d) => void act(() => supabase.rpc('move_item', { item_table: 'links', item_id: l.id, direction: d }))} />
-              <button type="button" className="btn adm-btn-danger"
-                onClick={() => { if (window.confirm(`Eliminar a ligação ${l.url}?`)) void act(() => supabase.from('links').delete().eq('id', l.id)); }}>
-                Eliminar
-              </button>
+              <DeleteButton onClick={() => void remove(l)} />
             </div>
           </li>
         ))}
-        <li className="adm-row adm-row--stack">
+        <li className="adm-row adm-row--stack adm-row--new">
+          <p className="adm-row-new-label">Nova ligação</p>
           <LinkForm value={{ id: '', kind: 'linkedin', url: '', label: '', placements: ['footer'] }} onSave={save} isNew />
         </li>
       </ol>
@@ -758,7 +782,7 @@ export function CvSeoSection() {
     }
   }
 
-  if (!site) return <Section title="CV e SEO"><NoticeLine notice={notice} /></Section>;
+  if (!site) return <Section title="CV e SEO"><Pending notice={notice} /></Section>;
   const current = site;
   const t = current.translations[locale];
   const setT = (patch: Partial<{ title: string; description: string }>) => setSite({ ...current, translations: { ...current.translations, [locale]: { ...t, ...patch } } });
@@ -782,9 +806,12 @@ export function CvSeoSection() {
           return (
             <Fieldset key={l} legend={`CV em ${l === 'pt' ? 'português' : 'inglês'}`}>
               {file ? (
-                <p>Atual: <a href={file.url} target="_blank" rel="noopener">ver PDF</a> <span className="muted">(atualizado a {file.updated})</span></p>
+                <p className="adm-file">
+                  <Icon name="file" />
+                  <span>Atual: <a href={file.url} target="_blank" rel="noopener">ver PDF</a> <span className="muted">(atualizado a {file.updated})</span></span>
+                </p>
               ) : (
-                <p className="muted">Ainda não há CV neste idioma{l === 'pt' ? '; o site mostra o inglês.' : '.'}</p>
+                <p className="adm-file adm-file--missing"><Icon name="warning" /><span>Ainda não há CV neste idioma{l === 'pt' ? '; o site mostra o inglês.' : '.'}</span></p>
               )}
               <p className="adm-hint">Antes de carregar, confirma que o PDF não expõe dados que não queres públicos (por exemplo, o telefone).</p>
               <Field label="Carregar PDF"><input id={`cv-${l}`} type="file" accept="application/pdf" disabled={busy !== ''} onChange={(e) => void uploadCv(l, e.target.files?.[0])} /></Field>
@@ -804,7 +831,7 @@ export function CvSeoSection() {
         <Fieldset legend="Imagem de partilha">
           <MediaField label="Imagem de partilha" items={current.og ? [current.og] : []} multiple={false} onChange={(items) => setSite({ ...current, og: items[0] ?? null })} />
         </Fieldset>
-        <div className="adm-span"><button className="btn btn--primary" type="submit">Guardar SEO</button></div>
+        <div className="adm-span adm-form-footer"><button className="btn btn--primary" type="submit">Guardar SEO</button></div>
       </form>
     </Section>
   );

@@ -652,6 +652,39 @@ export type Database = {
         }
         Relationships: []
       }
+      site_sync: {
+        Row: {
+          deployed_hash: string | null
+          id: number
+          last_error: string | null
+          pending_hash: string | null
+          pending_since: string | null
+          request_id: number | null
+          requested_at: string | null
+          retry_after: string | null
+        }
+        Insert: {
+          deployed_hash?: string | null
+          id?: number
+          last_error?: string | null
+          pending_hash?: string | null
+          pending_since?: string | null
+          request_id?: number | null
+          requested_at?: string | null
+          retry_after?: string | null
+        }
+        Update: {
+          deployed_hash?: string | null
+          id?: number
+          last_error?: string | null
+          pending_hash?: string | null
+          pending_since?: string | null
+          request_id?: number | null
+          requested_at?: string | null
+          retry_after?: string | null
+        }
+        Relationships: []
+      }
       technologies: {
         Row: {
           id: string
@@ -697,6 +730,7 @@ export type Database = {
         Args: { project_id: string }
         Returns: string[]
       }
+      published_content_hash: { Args: never; Returns: string }
       save_category: { Args: { payload: Json }; Returns: string }
       save_education: { Args: { payload: Json }; Returns: string }
       save_experience: { Args: { payload: Json }; Returns: string }
@@ -710,6 +744,8 @@ export type Database = {
         }
         Returns: undefined
       }
+      site_sync_status: { Args: never; Returns: Json }
+      sync_site: { Args: never; Returns: undefined }
     }
     Enums: {
       app_locale: "pt" | "en"

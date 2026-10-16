@@ -73,12 +73,13 @@ export interface ProjectRow {
   kind: Kind;
   category: string;
   title: string;
+  updatedAt: string;
 }
 
 export async function listProjects(): Promise<ProjectRow[]> {
   const { data, error } = await supabase
     .from('projects')
-    .select('id, slug, status, featured, kind, sort_order, categories(slug), project_translations(locale, title)')
+    .select('id, slug, status, featured, kind, sort_order, updated_at, categories(slug), project_translations(locale, title)')
     .order('sort_order')
     .order('id');
   if (error) throw error;
@@ -90,6 +91,7 @@ export async function listProjects(): Promise<ProjectRow[]> {
     kind: p.kind,
     category: p.categories?.slug ?? '',
     title: p.project_translations.find((t) => t.locale === 'pt')?.title || p.slug,
+    updatedAt: p.updated_at,
   }));
 }
 
@@ -342,5 +344,17 @@ export interface BuildState {
   url: string | null;
 }
 
-export const triggerBuild = () => callFunction('trigger-build', 'POST');
 export const buildStatus = (): Promise<BuildState> => callFunction('build-status', 'GET');
+
+/** Publicação automática (job site_sync na base de dados): alterações por enviar, último pedido e erro. */
+export interface SyncState {
+  pending: boolean;
+  requestedAt: string | null;
+  error: string | null;
+}
+
+export async function siteSyncStatus(): Promise<SyncState> {
+  const { data, error } = await supabase.rpc('site_sync_status');
+  if (error) throw error;
+  return data as unknown as SyncState;
+}

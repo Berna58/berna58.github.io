@@ -61,7 +61,12 @@ async function login(page: Page) {
     await page.getByLabel('Código de 6 dígitos').fill(totp(totpSecret));
     await page.getByRole('button', { name: 'Confirmar' }).click();
   }
-  await expect(page.getByRole('heading', { name: 'Projetos' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Visão geral' })).toBeVisible();
+}
+
+async function openProjects(page: Page) {
+  await page.getByRole('link', { name: 'Projetos', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Projetos' })).toBeVisible();
 }
 
 test('o ecrã de entrada não tem violações de acessibilidade', async ({ page }) => {
@@ -79,8 +84,18 @@ test('palavra-passe errada mostra uma mensagem clara', async ({ page }) => {
   await expect(page.getByRole('alert')).toHaveText('Email ou palavra-passe incorretos.');
 });
 
+test('a visão geral mostra o estado real dos projetos e não tem violações de acessibilidade', async ({ page }) => {
+  await login(page);
+  const { data } = await service.from('projects').select('status');
+  const published = (data ?? []).filter((p) => p.status === 'published').length;
+  await expect(page.locator('.adm-stats > div', { hasText: 'Publicados' }).locator('dd')).toHaveText(String(published));
+  const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  expect(axe.violations.map((v) => v.id)).toEqual([]);
+});
+
 test('criar, publicar, despublicar e eliminar um projeto sem tocar no código', async ({ page }) => {
   await login(page);
+  await openProjects(page);
   await expect(page.getByRole('link', { name: 'Associam' })).toBeVisible();
 
   // Novo projeto: começa como rascunho e mostra o que falta para publicar.
@@ -135,9 +150,13 @@ test('criar, publicar, despublicar e eliminar um projeto sem tocar no código', 
   expect(project?.i18n.pt.title).toBe('Projeto de teste');
   expect(project?.i18n.en.title).toBe('Test project');
 
-  // O botão de publicar o site chega à Edge Function (localmente sem token do GitHub).
-  await page.getByRole('button', { name: 'Publicar alterações no site' }).click();
-  await expect(page.getByText('A publicação ainda não está configurada', { exact: false })).toBeVisible();
+  // Não há botão para publicar o site: a base de dados deteta a alteração e pede o deploy sozinha
+  // (localmente não há Deploy Hook no Vault, por isso pode já mostrar esse aviso).
+  await expect(page.getByRole('button', { name: /Publicar alterações/ })).toHaveCount(0);
+  await expect(page.locator('.adm-build')).toContainText(/O site atualiza-se sozinho dentro de|falta o Deploy Hook/);
+  const { data: sync } = await service.from('site_sync').select('deployed_hash').single();
+  const { data: hash } = await service.rpc('published_content_hash');
+  expect(hash).not.toBe(sync?.deployed_hash);
 
   // Despublicar: sai da exportação.
   await page.getByRole('button', { name: 'Despublicar' }).click();
@@ -151,13 +170,48 @@ test('criar, publicar, despublicar e eliminar um projeto sem tocar no código', 
   await expect(confirm).toBeDisabled();
   await page.locator('#confirm-slug').fill(slug);
   await confirm.click();
-  await expect(page.getByRole('heading', { name: 'Projetos' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Projetos' })).toBeVisible();
   const { data: rows } = await service.from('projects').select('id').eq('slug', slug);
   expect(rows).toHaveLength(0);
 });
 
+test('sair do editor com alterações por guardar pede confirmação', async ({ page }) => {
+  await login(page);
+  await openProjects(page);
+  await page.getByRole('link', { name: 'Novo projeto' }).click();
+  await page.locator('#f-title-pt').fill('Rascunho por guardar');
+
+  // Cancelar mantém o editor e o que foi escrito.
+  await page.getByRole('link', { name: 'Perfil' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Sair sem guardar?' })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page.locator('#f-title-pt')).toHaveValue('Rascunho por guardar');
+
+  // Confirmar segue para a secção escolhida.
+  await page.getByRole('link', { name: 'Perfil' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Sair sem guardar' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Perfil' })).toBeVisible();
+});
+
+test('num ecrã de telemóvel o menu abre como gaveta e não há scroll horizontal', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await login(page);
+  const menu = page.getByRole('button', { name: 'Abrir menu' });
+  await expect(page.getByRole('link', { name: 'Percurso' })).toBeHidden();
+  await menu.click();
+  await page.getByRole('link', { name: 'Percurso' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Percurso' })).toBeVisible();
+  await expect(menu).toHaveAttribute('aria-expanded', 'false');
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+  const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  expect(axe.violations.map((v) => v.id)).toEqual([]);
+});
+
 test('reordenar move o projeto na lista do site', async ({ page }) => {
   await login(page);
+  await openProjects(page);
   await expect(page.locator('.adm-row-title').first()).toBeVisible();
   const titles = () => page.locator('.adm-row-title').allTextContents();
   const before = await titles();
@@ -205,8 +259,8 @@ test('perfil, percurso e CV geridos pelo painel chegam ao conteúdo do site', as
   await expect(page.getByText('Developer — Empresa de Teste')).toBeVisible();
   content = await exported();
   expect(content.experiences[0].organization).toBe('Empresa de Teste');
-  page.once('dialog', (dialog) => void dialog.accept());
   await page.getByRole('listitem').filter({ hasText: 'Empresa de Teste' }).getByRole('button', { name: 'Eliminar' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Eliminar', exact: true }).click();
   await expect(page.getByText('Developer — Empresa de Teste')).toHaveCount(0);
   content = await exported();
   expect(content.experiences.some((e) => e.organization === 'Empresa de Teste')).toBe(false);
