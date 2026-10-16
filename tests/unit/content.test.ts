@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { siteContentSchema, publishIssues } from '@/lib/content/schema';
 import { formatYearMonth } from '@/i18n/ui';
+import { skillRows } from '@/lib/content/evidence';
 
 const seed = JSON.parse(readFileSync('supabase/seed/content.json', 'utf8'));
 
@@ -43,5 +44,28 @@ describe('formatYearMonth', () => {
   });
   it('mantém só o ano quando não há mês', () => {
     expect(formatYearMonth('2022', 'pt')).toBe('2022');
+  });
+});
+
+describe('skillRows', () => {
+  const experiences = [
+    { organization: 'JoyTé', technologies: ['Laravel', 'PHP'] },
+    { organization: 'Liderteam', technologies: ['C#'] },
+  ];
+  const project = (slug: string, technologies: string[]) =>
+    ({ slug, technologies, i18n: { pt: { title: slug.toUpperCase() }, en: { title: slug } } }) as never;
+
+  it('agrupa por prova, profissional antes de projeto e do resto', () => {
+    const rows = skillRows(['HTML', 'React', 'Laravel', 'C#', 'PHP'], experiences, [project('ef', ['React', 'PHP'])], 'pt');
+    expect(rows).toEqual([
+      { kind: 'professional', names: ['Laravel', 'PHP'], organizations: ['JoyTé'] },
+      { kind: 'professional', names: ['C#'], organizations: ['Liderteam'] },
+      { kind: 'project', names: ['React'], projects: [{ slug: 'ef', title: 'EF' }] },
+      { kind: 'other', names: ['HTML'] },
+    ]);
+  });
+
+  it('sem experiências nem projetos, tudo fica sem prova', () => {
+    expect(skillRows(['SQL'], [], [], 'en')).toEqual([{ kind: 'other', names: ['SQL'] }]);
   });
 });

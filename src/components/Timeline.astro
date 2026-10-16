@@ -5,56 +5,143 @@ import type { Experience, Education, Locale } from '@/lib/content/schema';
 interface Props { locale: Locale; experiences: Experience[]; education?: Education[]; detailed?: boolean }
 const { locale, experiences, education = [], detailed = false } = Astro.props;
 const t = useT(locale);
-const period = (start: string, end: string | null) =>
-  `${formatYearMonth(start, locale)} – ${end ? formatYearMonth(end, locale) : t('date.present')}`;
+
+// Formação e experiência numa só linha, por ordem cronológica ("2019" < "2019-03" < "2019-09").
+const items = [
+  ...experiences.map((exp) => {
+    const text = exp.i18n[locale];
+    return {
+      kind: 'experience' as const,
+      start: exp.start,
+      end: exp.end,
+      label: t(('employment.' + exp.employmentType) as UiKey),
+      title: text.role,
+      org: exp.organization,
+      orgUrl: exp.orgUrl,
+      description: text.description,
+      highlights: text.highlights,
+      technologies: exp.technologies,
+    };
+  }),
+  ...education.map((edu) => ({
+    kind: 'education' as const,
+    start: edu.start,
+    end: edu.end,
+    label: t('education.title'),
+    title: edu.i18n[locale].degree,
+    org: edu.institution,
+    orgUrl: null,
+    description: edu.i18n[locale].description,
+    highlights: [] as string[],
+    technologies: [] as string[],
+  })),
+].sort((a, b) => a.start.localeCompare(b.start));
 ---
-<div class="timeline">
-  {experiences.length > 0 && (
-    <section aria-labelledby={`exp-${locale}`}>
-      <h3 id={`exp-${locale}`} class="group-title">{t('experience.title')}</h3>
-      <ol>
-        {experiences.map((exp) => {
-          const text = exp.i18n[locale];
-          return (
-            <li>
-              <p class="period mono">{period(exp.start, exp.end)} · {t(('employment.' + exp.employmentType) as UiKey)}</p>
-              <p class="role"><strong>{text.role}</strong> — {exp.orgUrl ? <a href={exp.orgUrl} rel="noopener" target="_blank">{exp.organization}</a> : exp.organization}</p>
-              {detailed && text.description && <p class="muted">{text.description}</p>}
-              {detailed && text.highlights.length > 0 && (
-                <ul class="highlights">{text.highlights.map((h) => <li>{h}</li>)}</ul>
-              )}
-              {exp.technologies.length > 0 && (
-                <ul class="tags" aria-label="Stack">{exp.technologies.map((tech) => <li class="tag">{tech}</li>)}</ul>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-    </section>
-  )}
-  {education.length > 0 && (
-    <section aria-labelledby={`edu-${locale}`}>
-      <h3 id={`edu-${locale}`} class="group-title">{t('education.title')}</h3>
-      <ol>
-        {education.map((edu) => (
-          <li>
-            <p class="period mono">{period(edu.start, edu.end)}</p>
-            <p class="role"><strong>{edu.i18n[locale].degree}</strong> — {edu.institution}</p>
-            {detailed && edu.i18n[locale].description && <p class="muted">{edu.i18n[locale].description}</p>}
-          </li>
-        ))}
-      </ol>
-    </section>
-  )}
-</div>
+<ol class="tl">
+  {items.map((item) => (
+    <li class:list={['item', item.kind, { current: !item.end }]}>
+      <p class="when">
+        <span class="period">{formatYearMonth(item.start, locale)} – {item.end ? formatYearMonth(item.end, locale) : <span class="now">{t('date.present')}</span>}</span>
+        <span class="kind">{item.label}</span>
+      </p>
+      <div class="body">
+        <h3 class="role">{item.title}</h3>
+        <p class="org">{item.orgUrl ? <a href={item.orgUrl} rel="noopener" target="_blank">{item.org}</a> : item.org}</p>
+        {detailed && item.description && <p class="desc">{item.description}</p>}
+        {detailed && item.highlights.length > 0 && (
+          <ul class="highlights">{item.highlights.map((h) => <li>{h}</li>)}</ul>
+        )}
+        {item.technologies.length > 0 && (
+          <ul class="tags" aria-label="Stack">{item.technologies.map((tech) => <li class="tag">{tech}</li>)}</ul>
+        )}
+      </div>
+    </li>
+  ))}
+</ol>
 
 <style>
-  .timeline { display: grid; gap: var(--space-7); }
-  .group-title { font-size: var(--step-1); letter-spacing: -0.01em; margin-bottom: var(--space-4); }
-  ol { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-5); }
-  ol > li { display: grid; gap: var(--space-2); padding-left: var(--space-5); border-left: 2px solid var(--line); }
-  .period { color: var(--muted); }
-  .role { max-width: var(--measure); }
-  .highlights { margin: 0; padding-left: 1.1rem; display: grid; gap: var(--space-1); max-width: var(--measure); }
-  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: 0; padding: 0; }
+  /* --rail-x: posição da linha; em ecrãs largos as datas ficam numa coluna à esquerda dela */
+  .tl { --rail-x: 0.5rem; --node: 0.95rem; position: relative; display: grid; gap: var(--space-7); list-style: none; margin: 0; padding: 0; }
+  /* calha e preenchimento da linha */
+  .tl::before, .tl::after {
+    content: "";
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: var(--rail-x);
+    width: 2px;
+    translate: -50% 0;
+    background: var(--line);
+  }
+  .tl::after { background: var(--ink); transform-origin: 50% 0; }
+
+  .item { position: relative; display: grid; gap: var(--space-3); padding-left: calc(var(--rail-x) + var(--space-5)); }
+  /* marcador: redondo para experiência, quadrado para formação */
+  .item::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: 0.3rem;
+    left: var(--rail-x);
+    width: var(--node);
+    height: var(--node);
+    translate: -50% 0;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--paper);
+  }
+  .education::before { border-radius: 2px; background: var(--ink); }
+  .item.current::before { background: var(--mint); box-shadow: 0 0 0 5px color-mix(in srgb, var(--mint) 40%, transparent); }
+
+  .when { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); }
+  .period { font: 500 var(--step--1)/1.5 var(--font-mono); font-variant-numeric: tabular-nums; }
+  .now { padding: 0.1em 0.4em; border-radius: var(--radius-s); background: var(--mint); color: var(--on-mint); }
+  .kind { font-size: var(--step--1); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .education .kind { color: var(--ink); font-weight: 700; }
+
+  .body { display: grid; gap: var(--space-3); justify-items: start; max-width: var(--measure); }
+  .role { margin: 0; font: 750 var(--step-2)/1.1 var(--font-display); letter-spacing: -0.02em; text-wrap: balance; }
+  .org { margin-top: calc(-1 * var(--space-2)); color: var(--muted); font-weight: 600; }
+  .desc { color: var(--muted); }
+  .highlights { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+  .highlights li { position: relative; padding-left: var(--space-4); }
+  .highlights li::before { content: ""; position: absolute; left: 0; top: 0.68em; width: 0.35rem; height: 0.35rem; background: var(--muted); }
+  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: var(--space-1) 0 0; padding: 0; }
+
+  @media (min-width: 52rem) {
+    .tl { --rail-x: 12rem; }
+    .item {
+      grid-template-columns: calc(var(--rail-x) - var(--space-6)) minmax(0, 1fr);
+      column-gap: calc(2 * var(--space-6));
+      padding-left: 0;
+    }
+    .when { flex-direction: column; align-items: flex-end; text-align: right; }
+  }
+
+  /*
+   * Momento de movimento da página: a linha desenha-se ao ritmo da leitura e cada marcador acende quando
+   * chega a ~60% do ecrã. Só com scroll-driven animations e sem pedido de movimento reduzido; sem isso,
+   * a linha e os marcadores aparecem já completos.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .tl::after {
+        animation: rail-draw linear both;
+        animation-timeline: view();
+        animation-range: entry 40% exit 40%;
+      }
+      .item::before {
+        animation: node-on linear both;
+        animation-timeline: view();
+        animation-range: cover 0% cover 40%;
+      }
+    }
+  }
+  @keyframes rail-draw {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+  @keyframes node-on {
+    from { scale: 0.6; border-color: var(--line); background: var(--paper); box-shadow: none; }
+  }
 </style>

@@ -28,7 +28,7 @@ export const projects = [...content.projects].sort(bySort);
 export const experiences = [...content.experiences].sort(bySort);
 export const education = [...content.education].sort(bySort);
 
-export const featuredProjects = () => projects.filter((p) => p.featured && p.category !== 'design').slice(0, 3);
+export const featuredProjects = () => projects.filter((p) => p.featured);
 export const designProjects = () => projects.filter((p) => p.category === 'design');
 
 export const linksFor = (placement: Link['placements'][number]) =>

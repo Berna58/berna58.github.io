@@ -2,76 +2,219 @@
 import { Image } from 'astro:assets';
 import Base from '@/layouts/Base.astro';
 import Timeline from '@/components/Timeline.astro';
+import SkillAreas from '@/components/SkillAreas.astro';
 import ContactSection from '@/components/ContactSection.astro';
 import { useT, type UiKey } from '@/i18n/ui';
-import { routes, otherLocale } from '@/i18n/routes';
-import { profile, technologies, experiences, education, imageOf } from '@/lib/content';
+import { routes, otherLocale, projectPath } from '@/i18n/routes';
+import { profile, projects, experiences, education, imageOf } from '@/lib/content';
 import type { Locale } from '@/lib/content/schema';
 
 interface Props { locale: Locale }
 const { locale } = Astro.props;
 const t = useT(locale);
 const text = profile.i18n[locale];
-const groups = (['backend', 'data', 'frontend', 'design', 'tools'] as const)
-  .map((group) => ({ group, items: technologies.filter((tech) => tech.group === group) }))
-  .filter((g) => g.items.length > 0);
-const photoWidth = 160;
+const paragraphs = (value: string) => value.split(/\n{2,}/);
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+// "Disponível: remoto, híbrido ou presencial"
+const modes = profile.workModes.map((mode) => t(('workMode.' + mode) as UiKey));
+const modeList = modes.length > 1 ? `${modes.slice(0, -1).join(', ')} ${t('about.or')} ${modes.at(-1)}` : modes.join('');
+const availability = profile.available
+  ? `${capitalize(t('status.available'))}${modeList ? ': ' + modeList : ''}`
+  : capitalize(t('status.unavailable'));
+const facts = [t('about.degree'), text.location, availability];
+
+const projectBySlug = (slug?: string) => (slug ? projects.find((p) => p.slug === slug) : undefined);
+// a plataforma da EF Gaspar Azevedo só ganha ligação quando for publicada como projeto com este slug
+const personalProject = projectBySlug('ef-gaspar-azevedo');
+const photoWidth = 168;
 const photoHeight = profile.photo ? Math.round(photoWidth / (profile.photo.width / profile.photo.height)) : 0;
 ---
 <Base locale={locale} alternatePath={routes.about[otherLocale(locale)]} title={t('about.title')} description={text.bioShort} current="about">
-  <div class="container page">
-    <header class="intro">
-      {profile.photo && (
-        <Image src={imageOf(profile.photo)} alt={profile.photo.i18n[locale].alt} width={photoWidth} height={photoHeight} widths={[photoWidth, profile.photo.width]} sizes={`${photoWidth}px`} class="photo" loading="eager" />
-      )}
-      <div class="intro-text">
-        <h1>{t('about.title')}</h1>
-        <p class="eyebrow">{text.roleLine} &middot; {text.location}</p>
-        <div class="bio">{text.bioLong.split(/\n{2,}/).map((p) => <p>{p}</p>)}</div>
-      </div>
-    </header>
+  <header class="about-hero texture">
+    <div class="container hero-inner">
+      <h1 class="display">{t('about.headline')} <span class="mark">{t('about.headlineMark')}</span></h1>
+      <p class="facts">{facts.map((fact, i) => <>{i > 0 && <span class="sep" aria-hidden="true"></span>}<span>{fact}</span></>)}</p>
+    </div>
+  </header>
 
-    <section aria-labelledby="about-path">
-      <h2 id="about-path" class="visually-hidden">{t('section.path')}</h2>
+  <div class="container page">
+    <section class="me" aria-labelledby="about-me">
+      {profile.photo && (
+        <Image src={imageOf(profile.photo)} alt={profile.photo.i18n[locale].alt} width={photoWidth} height={photoHeight} widths={[photoWidth, photoWidth * 2]} sizes={`${photoWidth}px`} class="photo" loading="eager" />
+      )}
+      <div class="me-text">
+        <h2 id="about-me">{t('about.me')}</h2>
+        <div class="prose">{paragraphs(text.bioLong).map((p) => <p>{p}</p>)}</div>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="about-path">
+      <h2 id="about-path">{t('section.path')}</h2>
       <Timeline locale={locale} experiences={experiences} education={education} detailed />
     </section>
 
-    <section class="stack" aria-labelledby="about-stack">
-      <h2 id="about-stack">{t('about.stack')}</h2>
-      <dl>
-        {groups.map(({ group, items }) => (
-          <div>
-            <dt class="mono">{t(('group.' + group) as UiKey)}</dt>
-            <dd><ul class="tags">{items.map((tech) => <li class="tag">{tech.name}</li>)}</ul></dd>
-          </div>
-        ))}
-      </dl>
+    <section class="block" aria-labelledby="about-skills">
+      <h2 id="about-skills">{t('skills.title')}</h2>
+      <SkillAreas locale={locale} />
+      <p class="learning"><strong>{t('skills.learning')}</strong> <span>{t('skills.certs')}</span></p>
     </section>
 
-    {text.aiNote && (
-      <section aria-labelledby="about-ai" class="ai">
-        <h2 id="about-ai">{t('about.ai')}</h2>
-        <div class="bio">{text.aiNote.split(/\n{2,}/).map((p) => <p>{p}</p>)}</div>
+    {text.principles.length > 0 && (
+      <section class="block" aria-labelledby="about-approach">
+        <h2 id="about-approach">{t('approach.title')}</h2>
+        <ol class="steps">
+          {text.principles.map((step) => {
+            const linked = projectBySlug(step.projectSlug);
+            return (
+              <li>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+                {linked && <a href={projectPath(linked.slug, locale)}>{linked.i18n[locale].title}</a>}
+              </li>
+            );
+          })}
+        </ol>
+        {text.aiNote && (
+          <aside class="ai" aria-labelledby="about-ai">
+            <h3 id="about-ai">{t('about.ai')}</h3>
+            <div class="prose">{paragraphs(text.aiNote).map((p) => <p>{p}</p>)}</div>
+          </aside>
+        )}
       </section>
     )}
+
+    <section class="personal" aria-labelledby="about-personal">
+      <div class="personal-text">
+        <h2 id="about-personal">{t('personal.title')}</h2>
+        <p>{t('personal.text')}</p>
+      </div>
+      <div class="personal-meta">
+        <ul class="tags" aria-label="Stack">{t('personal.stack').split(', ').map((tech) => <li class="tag">{tech}</li>)}</ul>
+        {personalProject && <a class="btn btn--primary" href={projectPath(personalProject.slug, locale)}>{t('project.view')}</a>}
+      </div>
+    </section>
+
+    <p class="next">
+      <a class="btn btn--outline" href={routes.projects[locale]}>{t('section.allProjects')}</a>
+    </p>
   </div>
   <ContactSection locale={locale} />
 </Base>
 
 <style>
-  .page { display: grid; gap: var(--space-8); padding-block: var(--space-7) var(--space-6); }
-  .intro { display: grid; gap: var(--space-6); align-items: start; }
-  .photo { width: 160px; height: auto; border-radius: var(--radius-m); border: 1px solid var(--line); }
-  .intro-text { display: grid; gap: var(--space-4); }
-  .bio { display: grid; gap: var(--space-4); max-width: var(--measure); }
-  .stack, .ai { display: grid; gap: var(--space-5); }
-  .stack dl { display: grid; gap: var(--space-4); margin: 0; }
-  .stack dl > div { display: grid; gap: var(--space-2); }
-  .stack dt { color: var(--muted); }
-  .stack dd { margin: 0; }
-  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: 0; padding: 0; }
-  @media (min-width: 48rem) {
-    .intro { grid-template-columns: 160px 1fr; }
-    .stack dl > div { grid-template-columns: 8rem 1fr; align-items: baseline; }
+  /* topo: frase de identidade sobre o mesmo fundo de ondas do hero da página inicial (classe global .texture) */
+  .about-hero { padding-block: var(--space-7) var(--space-8); }
+  .hero-inner { display: grid; gap: var(--space-6); justify-items: start; }
+  .display {
+    max-width: 15ch;
+    font-weight: 800;
+    font-size: clamp(2.5rem, 1rem + 6.5vw, 6rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+  .mark {
+    display: inline-block;
+    padding: 0.02em 0.08em 0.06em;
+    margin-left: -0.04em;
+    background: var(--mint);
+    color: var(--on-mint);
+  }
+  /*
+   * Ao carregar, o realce menta desenha-se da esquerda para a direita por trás da palavra e o texto passa à cor
+   * sobre menta ao mesmo tempo (no tema escuro o texto começa claro). Sem pedido de movimento reduzido apenas.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .mark { position: relative; isolation: isolate; background: none; animation: mark-ink 650ms 200ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .mark::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: var(--mint);
+      transform-origin: 0 50%;
+      animation: mark-draw 650ms 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+  @keyframes mark-draw { from { transform: scaleX(0); } }
+  @keyframes mark-ink { from { color: var(--ink); } }
+  /* em ecrãs estreitos os factos ficam um por linha; os separadores só aparecem quando cabem numa linha */
+  .facts { display: grid; gap: var(--space-1); color: var(--muted); }
+  .sep { display: none; width: 0.4rem; height: 0.4rem; background: var(--accent-text); rotate: 45deg; }
+  @media (min-width: 64rem) {
+    .facts { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+    .sep { display: block; }
+  }
+
+  .page { display: grid; gap: var(--space-9); padding-bottom: var(--space-7); }
+  .block { display: grid; gap: var(--space-7); }
+  .prose { display: grid; gap: var(--space-4); max-width: var(--measure); }
+
+  /* sobre mim: fotografia e texto, sem cartão */
+  .me { display: grid; gap: var(--space-6); align-items: start; }
+  .photo { width: 168px; height: auto; border-radius: var(--radius-m); border: 1px solid var(--line); }
+  .me-text { display: grid; gap: var(--space-5); }
+  .me .prose { font-size: var(--step-1); line-height: 1.6; }
+
+  .learning {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .learning strong { color: var(--ink); }
+
+  /* forma de trabalhar: a ordem dos passos é a informação, por isso são numerados */
+  .steps { display: grid; gap: var(--space-6); margin: 0; padding: 0; list-style: none; counter-reset: step; }
+  .steps > li { display: grid; gap: var(--space-2); align-content: start; counter-increment: step; }
+  .steps > li::before {
+    content: counter(step, decimal-leading-zero);
+    margin-bottom: var(--space-2);
+    padding-bottom: var(--space-3);
+    border-bottom: 2px solid var(--ink);
+    font: 800 var(--step-3)/1 var(--font-display);
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  .steps h3 { font-size: var(--step-1); letter-spacing: -0.01em; }
+  .steps p { color: var(--muted); }
+  .ai {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+  }
+  .ai h3 { font-size: var(--step-1); letter-spacing: -0.01em; }
+
+  /* projeto pessoal: único bloco escuro da página */
+  .personal {
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--space-7) var(--space-5);
+    border-radius: 24px;
+    background: var(--chapter-card);
+    color: var(--on-chapter);
+  }
+  .personal-text { display: grid; gap: var(--space-4); }
+  .personal-text p { max-width: 58ch; font-size: var(--step-1); line-height: 1.6; color: var(--on-chapter-muted); }
+  .personal-meta { display: grid; gap: var(--space-5); align-content: end; justify-items: start; }
+  .personal .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: 0; padding: 0; }
+  .personal .tag { background: transparent; border-color: rgb(255 255 255 / 0.25); color: var(--on-chapter); }
+  .personal :focus-visible { outline-color: var(--mint); }
+  .personal .btn--primary { border-color: var(--mint); }
+  .personal .btn--primary:hover { background: var(--on-chapter); color: var(--chapter-card); border-color: var(--on-chapter); }
+
+  .next { display: flex; justify-content: center; }
+
+  @media (min-width: 52rem) {
+    .about-hero { padding-block: var(--space-8) var(--space-9); }
+    .me { grid-template-columns: 168px minmax(0, 1fr); gap: var(--space-7); }
+    .steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .ai { grid-template-columns: minmax(0, 14rem) minmax(0, 1fr); gap: var(--space-6); padding: var(--space-6); }
+    .personal { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); padding: var(--space-8) var(--space-7); }
   }
 </style>

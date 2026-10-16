@@ -2,11 +2,12 @@
 import Base from '@/layouts/Base.astro';
 import Hero from '@/components/Hero.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
-import Timeline from '@/components/Timeline.astro';
+import Coverflow from '@/components/Coverflow.astro';
+import AboutIntro from '@/components/AboutIntro.astro';
 import ContactSection from '@/components/ContactSection.astro';
-import { useT, type UiKey } from '@/i18n/ui';
+import { useT } from '@/i18n/ui';
 import { routes, otherLocale } from '@/i18n/routes';
-import { profile, technologies, experiences, education, featuredProjects, designProjects, linksFor } from '@/lib/content';
+import { profile, technologies, education, projects, featuredProjects, linksFor } from '@/lib/content';
 import type { Locale } from '@/lib/content/schema';
 
 interface Props { locale: Locale }
@@ -14,11 +15,8 @@ const { locale } = Astro.props;
 const t = useT(locale);
 const text = profile.i18n[locale];
 const featured = featuredProjects();
-const design = designProjects().slice(0, 3);
-const behance = linksFor('design')[0];
-const groups = (['backend', 'data', 'frontend', 'design', 'tools'] as const)
-  .map((group) => ({ group, items: technologies.filter((tech) => tech.group === group) }))
-  .filter((g) => g.items.length > 0);
+// com menos de 3 destaques, o carrossel completa-se com os restantes projetos (destaques primeiro)
+const showcase = featured.length >= 3 ? featured : [...featured, ...projects.filter((p) => !p.featured)];
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -33,60 +31,29 @@ const jsonLd = {
 };
 ---
 <Base locale={locale} alternatePath={routes.home[otherLocale(locale)]} current="home" jsonLd={jsonLd}>
-  <Hero locale={locale} />
+  <Hero locale={locale} next={showcase.length > 0 ? 'featured-title' : 'about-intro-title'} />
 
-  {featured.length > 0 && (
-    <section class="section container" aria-labelledby="featured-title">
-      <div class="section-head">
-        <h2 id="featured-title">{t('section.featured')}</h2>
-        <a href={routes.projects[locale]}>{t('section.allProjects')}</a>
-      </div>
-      <div class="grid">
-        {featured.map((project, i) => <ProjectCard project={project} locale={locale} priority={i === 0} />)}
-      </div>
-    </section>
-  )}
-
-  <section class="section container" aria-labelledby="stack-title">
-    <div class="section-head">
-      <h2 id="stack-title">{t('section.stack')}</h2>
-    </div>
-    {text.principles.length > 0 && (
-      <ul class="principles">
-        {text.principles.map((p) => <li><h3>{p.title}</h3><p class="muted">{p.description}</p></li>)}
-      </ul>
-    )}
-    <p class="muted intro">{t('section.stackIntro')}</p>
-    <dl class="stack">
-      {groups.map(({ group, items }) => (
-        <div>
-          <dt class="mono">{t(('group.' + group) as UiKey)}</dt>
-          <dd><ul class="tags">{items.map((tech) => <li class="tag">{tech.name}</li>)}</ul></dd>
+  {showcase.length > 0 && (
+    <section class="section" aria-labelledby="featured-title">
+      <div class="container">
+        <div class="section-head">
+          <h2 id="featured-title" class="visually-hidden">{t('section.featured')}</h2>
         </div>
-      ))}
-    </dl>
-  </section>
-
-  <section class="section container" aria-labelledby="path-title">
-    <div class="section-head">
-      <h2 id="path-title">{t('section.path')}</h2>
-      <a href={routes.about[locale]}>{t('section.fullPath')}</a>
-    </div>
-    <Timeline locale={locale} experiences={experiences.slice(0, 2)} education={education} />
-  </section>
-
-  {design.length > 0 && (
-    <section class="section container" aria-labelledby="design-title">
-      <div class="section-head">
-        <h2 id="design-title">{t('section.design')}</h2>
-        {behance && <a href={behance.url} rel="noopener" target="_blank">{t('section.behance')}</a>}
       </div>
-      <p class="muted intro">{t('section.designIntro')}</p>
-      <div class="grid">
-        {design.map((project) => <ProjectCard project={project} locale={locale} />)}
+      {showcase.length >= 3 ? (
+        <Coverflow projects={showcase} locale={locale} />
+      ) : (
+        <div class="container grid">
+          {showcase.map((project, i) => <ProjectCard project={project} locale={locale} priority={i === 0} />)}
+        </div>
+      )}
+      <div class="section-cta">
+        <a class="btn btn--outline" href={routes.projects[locale]}>{t('section.allProjects')}</a>
       </div>
     </section>
   )}
+
+  <AboutIntro locale={locale} />
 
   <ContactSection locale={locale} />
 </Base>
@@ -94,16 +61,6 @@ const jsonLd = {
 <style>
   .section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-3) var(--space-5); margin-bottom: var(--space-6); }
   .section-head a { font-weight: 600; }
-  .intro { margin-bottom: var(--space-5); max-width: var(--measure); }
+  .section-cta { display: flex; justify-content: center; margin-top: var(--space-6); padding-inline: var(--gutter); }
   .grid { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
-  .principles { list-style: none; margin: 0 0 var(--space-6); padding: 0; display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
-  .principles h3 { font-size: var(--step-1); margin-bottom: var(--space-2); }
-  .stack { display: grid; gap: var(--space-4); margin: 0; }
-  .stack > div { display: grid; gap: var(--space-2); }
-  .stack dt { color: var(--muted); }
-  .stack dd { margin: 0; }
-  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: 0; padding: 0; }
-  @media (min-width: 40rem) {
-    .stack > div { grid-template-columns: 8rem 1fr; align-items: baseline; }
-  }
 </style>

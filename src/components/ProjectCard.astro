@@ -1,65 +1,131 @@
 ---
 import { Picture } from 'astro:assets';
-import { useT, type UiKey } from '@/i18n/ui';
+import { useT } from '@/i18n/ui';
 import { projectPath } from '@/i18n/routes';
 import { imageOf, categoryName } from '@/lib/content';
 import type { Locale, Project } from '@/lib/content/schema';
 
-interface Props { project: Project; locale: Locale; headingLevel?: 'h2' | 'h3'; priority?: boolean }
-const { project, locale, headingLevel = 'h3', priority = false } = Astro.props;
+interface Props { project: Project; locale: Locale; headingLevel?: 'h2' | 'h3'; priority?: boolean; span?: 'wide' | 'narrow' | 'full' }
+const { project, locale, headingLevel = 'h3', priority = false, span } = Astro.props;
 const t = useT(locale);
 const text = project.i18n[locale];
 const Heading = headingLevel;
-const meta = [categoryName(project.category, locale), project.year?.toString(), project.state ? t(('state.' + project.state) as UiKey) : undefined].filter(Boolean);
 ---
-<article class="card" data-category={project.category}>
+<article class="card" data-category={project.category} data-span={span}>
   <Picture
     src={imageOf(project.cover)}
     alt={project.cover.i18n[locale].alt}
     formats={['avif', 'webp']}
-    widths={[400, 720, 1080]}
-    sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
-    width={1080}
+    widths={[480, 800, 1200, 1600]}
+    sizes="(min-width: 64rem) 60vw, (min-width: 40rem) 90vw, 100vw"
+    width={1200}
     loading={priority ? "eager" : "lazy"}
+    fetchpriority={priority ? "high" : undefined}
     class="cover"
   />
+  <p class="category">{categoryName(project.category, locale)}</p>
   <div class="body">
-    <p class="meta mono">{meta.join(' · ')}</p>
     <Heading class="title"><a href={projectPath(project.slug, locale)}>{text.title}</a></Heading>
-    <p class="summary">{text.summary}</p>
-    {(project.technologies.length > 0 || project.kind === 'case_study') && (
-      <ul class="tags" aria-label="Stack">
-        {project.technologies.map((tech) => <li class="tag">{tech}</li>)}
-        {project.kind === 'case_study' && project.demoUrl && <li class="tag tag--mint">demo</li>}
-        {project.kind === 'case_study' && <li class="tag">{t(('code.' + project.codeVisibility) as UiKey)}</li>}
-      </ul>
-    )}
+    <span class="cta" aria-hidden="true">
+      {t('project.view')}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9" /></svg>
+    </span>
   </div>
 </article>
 
 <style>
+  /* cartão de capa: só a imagem; ao passar o rato (ou com foco) sobe um véu menta com o título */
   .card {
     position: relative;
-    display: grid;
-    grid-template-rows: auto 1fr;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-m);
-    background: var(--surface);
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    aspect-ratio: var(--card-ratio, 4 / 5);
+    min-height: 22rem;
+    border-radius: 22px;
     overflow: hidden;
-    transition: transform var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
+    background: #141518;
+    box-shadow: 0 24px 48px -28px rgb(0 0 0 / 0.45);
+    transition: box-shadow var(--dur-3) var(--ease), transform var(--dur-3) var(--ease);
   }
-  .card:hover { transform: translateY(-2px); border-color: var(--ink); }
-  .card :global(.cover) { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-bottom: 1px solid var(--line); }
-  .body { display: grid; gap: var(--space-2); align-content: start; padding: var(--space-4) var(--space-5) var(--space-5); }
-  .meta { color: var(--muted); margin: 0; }
-  .title { font-size: var(--step-2); }
-  .title a { color: var(--ink); text-decoration: none; }
+  .card :global(.cover) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 900ms var(--ease);
+  }
+  /* véu menta: a menta é clara nos dois temas, por isso o texto por cima usa --on-mint */
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(to top, rgb(184 247 228 / 0.96), rgb(184 247 228 / 0.82) 30%, rgb(184 247 228 / 0) 62%);
+    opacity: 0;
+    transition: opacity var(--dur-3) var(--ease);
+  }
+
+  .category {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    padding: 0.45rem 0.85rem;
+    border: 1px solid rgb(255 255 255 / 0.35);
+    border-radius: var(--radius-pill);
+    background: rgb(12 13 15 / 0.55);
+    color: #fff;
+    font: 600 0.8125rem/1 var(--font-body);
+    letter-spacing: 0.02em;
+  }
+
+  .body {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3);
+    padding: clamp(1.25rem, 3vw, 2rem);
+    color: var(--on-mint);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity var(--dur-3) var(--ease), transform var(--dur-3) var(--ease);
+  }
+  .title {
+    font-size: clamp(1.625rem, 1.1rem + 1.6vw, 2.5rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .title a { color: inherit; text-decoration: none; }
   /* toda a área do cartão é clicável, mantendo um único link acessível */
-  .title a::after { content: ""; position: absolute; inset: 0; }
+  .title a::after { content: ""; position: absolute; inset: 0; z-index: 1; }
   .title a:focus-visible { outline: none; }
-  .card:has(.title a:focus-visible) { outline: 2px solid var(--focus); outline-offset: 3px; }
-  .summary { color: var(--muted); }
-  .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: var(--space-2) 0 0; padding: 0; }
-  .tag--mint { background: var(--mint); color: var(--on-mint); border-color: var(--mint); }
-  @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
+  .card:has(.title a:focus-visible) { outline: 3px solid var(--focus); outline-offset: 4px; }
+
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: 700 0.8125rem/1 var(--font-body);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .cta svg { transition: transform var(--dur-2) var(--ease); }
+
+  /* revelar: rato por cima ou foco do teclado */
+  .card:hover::before, .card:focus-within::before { opacity: 1; }
+  .card:hover .body, .card:focus-within .body { opacity: 1; transform: none; }
+
+  /* ecrãs táteis não têm hover: o véu e o título ficam sempre visíveis */
+  @media (hover: none) {
+    .card::before { opacity: 1; }
+    .body { opacity: 1; transform: none; }
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .card:hover { transform: translateY(-4px); box-shadow: 0 36px 64px -30px rgb(0 0 0 / 0.55); }
+    .card:hover :global(.cover) { transform: scale(1.04); }
+    .card:hover .cta svg { transform: translate(3px, -3px); }
+  }
 </style>

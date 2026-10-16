@@ -1,0 +1,213 @@
+---
+import { useT } from '@/i18n/ui';
+import { routes } from '@/i18n/routes';
+import { profile, projects, experiences, technologies } from '@/lib/content';
+import type { Locale } from '@/lib/content/schema';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useT(locale);
+const text = profile.i18n[locale];
+// números reais, calculados no build a partir do conteúdo do painel
+const stats = [
+  { value: projects.length, label: t('stats.projects') },
+  { value: experiences.length, label: t('stats.experiences') },
+  { value: technologies.length, label: t('stats.technologies') },
+];
+
+// Rede de sistemas atrás da foto (viewBox 400×400): seis nós numa órbita, ligados ao centro, com pacotes de dados a circular.
+const orbit = 170;
+const onOrbit = (deg: number) => {
+  const a = (deg * Math.PI) / 180;
+  return { x: Math.round(200 + orbit * Math.cos(a)), y: Math.round(200 + orbit * Math.sin(a)) };
+};
+// ícones de traço desenhados à volta de (0,0): base de dados, API, código, browser, servidor, ERP
+const icons = [
+  'M-8 -5a8 3 0 1 0 16 0a8 3 0 1 0 -16 0M-8 -5v10a8 3 0 0 0 16 0v-10M-8 0a8 3 0 0 0 16 0',
+  'M-3 -8c-2 0-3 1-3 3v2c0 1.5-1 2.5-2.5 3 1.5.5 2.5 1.5 2.5 3v2c0 2 1 3 3 3M3 -8c2 0 3 1 3 3v2c0 1.5 1 2.5 2.5 3-1.5.5-2.5 1.5-2.5 3v2c0 2-1 3-3 3',
+  'M-3.5 -6L-8.5 0L-3.5 6M3.5 -6L8.5 0L3.5 6M1.5 -8L-1.5 8',
+  'M-9 -7h18v14h-18zM-9 -3h18',
+  'M-8 -8h16v7h-16zM-8 1h16v7h-16zM-5 -4.5h.01M-5 4.5h.01',
+  'M-8 -8h7v7h-7zM1 -8h7v7h-7zM-8 1h7v7h-7zM1 1h7v7h-7z',
+];
+const nodes = icons.map((icon, i) => ({ ...onOrbit(i * 60 - 90), icon }));
+const packets = [-60, 60, 180].map(onOrbit);
+---
+<section class="section about-intro" aria-labelledby="about-intro-title">
+  <div class="container">
+    <div class="intro-grid">
+      <div class="art" aria-hidden="true" data-art>
+        <svg class="network" viewBox="0 0 400 400" fill="none">
+          <circle class="halo" cx="200" cy="200" r="196" />
+          <!-- os pacotes ficam por baixo dos nós, para nunca taparem os ícones ao passar -->
+          <g class="packets">{packets.map((p) => <circle cx={p.x} cy={p.y} r="4.5" />)}</g>
+          <g class="spin">
+            <circle class="orbit" cx="200" cy="200" r={orbit} />
+            {nodes.map((node) => <line class="link" x1="200" y1="200" x2={node.x} y2={node.y} />)}
+            {nodes.map((node) => (
+              <g transform={`translate(${node.x} ${node.y})`}>
+                <g class="node"><rect x="-24" y="-24" width="48" height="48" rx="13" /><path d={node.icon} transform="scale(1.3)" /></g>
+              </g>
+            ))}
+          </g>
+        </svg>
+        <img class="tile" src="/foto.jpeg" alt="" width="320" height="320" loading="lazy" />
+      </div>
+      <div class="copy">
+        <h2 id="about-intro-title" class="hello">{t('about.hello')} <strong>{profile.fullName}</strong></h2>
+        <p class="bio">{text.bioShort}</p>
+        <a class="pill-btn" href={routes.about[locale]}>
+          {t('about.cta')}
+          <span class="pill-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <dl class="stats" aria-label={t('about.statsLabel')} data-stats>
+      {stats.map((stat) => (
+        <div>
+          <dt>{stat.label}</dt>
+          <!-- o valor final está sempre no HTML; a contagem é só visual e os leitores de ecrã leem o texto escondido -->
+          <dd><span aria-hidden="true" data-count={stat.value}>+{stat.value}</span><span class="visually-hidden">+{stat.value}</span></dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<script>
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // A rede atrás da foto só roda enquanto está visível.
+  const art = document.querySelector<HTMLElement>('[data-art]');
+  if (art && !reduced) {
+    new IntersectionObserver(([entry]) => art.toggleAttribute('data-paused', !entry.isIntersecting)).observe(art);
+  }
+
+  // Os números contam a partir de 0 na primeira vez que a linha aparece.
+  const stats = document.querySelector<HTMLElement>('[data-stats]');
+  if (stats && !reduced) {
+    const counters = [...stats.querySelectorAll<HTMLElement>('[data-count]')];
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      for (const el of counters) el.textContent = '+0';
+      const start = performance.now();
+      const duration = 1100;
+      const tick = (now: number) => {
+        const progress = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(2, -10 * progress); // desacelera no fim (ease-out exponencial)
+        for (const el of counters) el.textContent = `+${Math.round(Number(el.dataset.count) * (progress === 1 ? 1 : eased))}`;
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }, { threshold: 0.6 });
+    observer.observe(stats);
+  }
+</script>
+
+<style>
+  .about-intro { overflow-x: clip; }
+  .intro-grid { display: grid; gap: var(--space-7); align-items: center; }
+
+  /* foto ao centro de uma rede de sistemas: nós (base de dados, API, código…) ligados a ela */
+  .art { position: relative; width: min(24rem, 86%); aspect-ratio: 1; margin-inline: auto; }
+  .network { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .halo { stroke: var(--accent-text); stroke-opacity: 0.25; stroke-width: 1.5; stroke-dasharray: 2 10; stroke-linecap: round; }
+  .orbit { stroke: var(--accent-text); stroke-opacity: 0.4; stroke-width: 1.5; stroke-dasharray: 6 8; }
+  .link { stroke: var(--accent-text); stroke-opacity: 0.3; stroke-width: 1.5; }
+  .node rect { fill: var(--mint-shape); }
+  .node path { stroke: var(--ink); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .packets circle { fill: var(--accent-text); }
+  .halo, .spin, .packets { transform-origin: 200px 200px; }
+  .node { transform-box: fill-box; transform-origin: center; }
+  /*
+   * A rede roda sempre, devagar (uma volta por minuto); os ícones rodam ao contrário para ficarem direitos,
+   * os pacotes de dados circulam mais depressa e o anel exterior gira no sentido oposto.
+   * Tudo pausa fora do ecrã (ver script) e fica parado com movimento reduzido.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .spin { animation: spin 60s linear infinite; }
+    .node { animation: spin 60s linear infinite reverse; }
+    .packets { animation: spin 14s linear infinite; }
+    .halo { animation: spin 90s linear infinite reverse; }
+    .art[data-paused] :is(.spin, .node, .packets, .halo) { animation-play-state: paused; }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .tile {
+    position: absolute;
+    inset: 18%;
+    width: 64%;
+    height: 64%;
+    border-radius: 20%;
+    box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.45);
+  }
+
+  .copy { display: grid; gap: var(--space-5); justify-items: start; }
+  .hello { font: 400 var(--step-2)/1.2 var(--font-body); letter-spacing: normal; color: var(--muted); }
+  .hello strong { font-weight: 600; color: var(--ink); }
+  .bio { max-width: 52ch; font-size: var(--step-1); line-height: 1.7; }
+  .pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 3.5rem;
+    padding: 0 var(--space-3) 0 var(--space-6);
+    border-radius: var(--radius-pill);
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    transition: background var(--dur-2) var(--ease), color var(--dur-2) var(--ease), scale var(--dur-1) var(--ease);
+  }
+  .pill-icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    transition: transform var(--dur-2) var(--ease), background var(--dur-2) var(--ease), color var(--dur-2) var(--ease);
+  }
+  .pill-icon svg { transition: translate var(--dur-2) var(--ease); }
+  /* ao passar o rato ou focar: o botão fica menta, o círculo enche e a seta avança */
+  .pill-btn:hover, .pill-btn:focus-visible { background: var(--mint); color: var(--on-mint); }
+  .pill-btn:hover .pill-icon, .pill-btn:focus-visible .pill-icon { transform: translateX(3px); background: var(--on-mint); color: var(--mint); }
+  .pill-btn:hover .pill-icon svg, .pill-btn:focus-visible .pill-icon svg { translate: 1px 0; }
+  .pill-btn:active { scale: 0.98; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: var(--space-8) 0 0;
+    border-block: 1px solid var(--line);
+  }
+  .stats > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-2);
+    text-align: center;
+  }
+  .stats > div + div { border-left: 1px solid var(--line); }
+  /* o número aparece por cima do rótulo, mantendo dt antes de dd no HTML */
+  .stats dd {
+    order: -1;
+    margin: 0;
+    font: 800 clamp(2.5rem, 1.5rem + 4vw, 4.5rem)/1 var(--font-display);
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stats dt { font-size: var(--step--1); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+  @media (min-width: 52rem) {
+    .intro-grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+    .art { width: min(26rem, 100%); }
+  }
+</style>

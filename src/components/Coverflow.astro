@@ -1,0 +1,321 @@
+---
+import { Picture } from 'astro:assets';
+import { useT } from '@/i18n/ui';
+import { projectPath } from '@/i18n/routes';
+import { imageOf, categoryName } from '@/lib/content';
+import type { Locale, Project } from '@/lib/content/schema';
+
+interface Props { projects: Project[]; locale: Locale }
+const { projects, locale } = Astro.props;
+const t = useT(locale);
+---
+<div class="coverflow" data-coverflow data-of={t('coverflow.of')}>
+  <ul class="track" role="list" data-track>
+    {projects.map((project) => {
+      const text = project.i18n[locale];
+      const tags = [categoryName(project.category, locale), ...project.technologies.slice(0, 2)];
+      return (
+        <li class="slide" data-slide>
+          <article class="cf-card">
+            <Picture
+              src={imageOf(project.cover)}
+              alt={project.cover.i18n[locale].alt}
+              formats={['avif', 'webp']}
+              widths={[480, 800, 1200]}
+              sizes="(min-width: 52rem) 46rem, 82vw"
+              width={1200}
+              loading="lazy"
+              class="cover"
+            />
+            <div class="info">
+              {project.year && <p class="year">{project.year}</p>}
+              <h3 class="title"><a href={projectPath(project.slug, locale)}>{text.title}</a></h3>
+              <p class="summary">{text.summary}</p>
+              <ul class="pills" role="list">{tags.map((tag) => <li>{tag}</li>)}</ul>
+            </div>
+          </article>
+        </li>
+      );
+    })}
+  </ul>
+
+  <!-- os controlos só aparecem com JavaScript; sem ele fica uma faixa com scroll nativo -->
+  <button type="button" class="arrow arrow--prev" data-prev hidden>
+    <span class="visually-hidden">{t('project.prev')}</span>
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+  </button>
+  <button type="button" class="arrow arrow--next" data-next hidden>
+    <span class="visually-hidden">{t('project.next')}</span>
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+  </button>
+  <div class="dots" data-dots hidden>
+    {projects.map((project) => <button type="button" class="dot" aria-label={project.i18n[locale].title}></button>)}
+  </div>
+  <p class="visually-hidden" aria-live="polite" data-status></p>
+</div>
+
+<script>
+  // Posição de cada cartão conforme a distância ao central: [deslocamento (% da largura), escala, rotação].
+  const LAYOUT = [
+    [0, 1, 0],
+    [60, 0.8, 22],
+    [96, 0.62, 30],
+    [118, 0.5, 34],
+  ] as const;
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-coverflow]')) {
+    const track = root.querySelector<HTMLElement>('[data-track]')!;
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-slide]')];
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
+    const dotsBox = root.querySelector<HTMLElement>('[data-dots]')!;
+    const dots = [...dotsBox.querySelectorAll<HTMLButtonElement>('button')];
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const n = slides.length;
+    let active = 0;
+    const offsets = new Map<HTMLElement, number>();
+
+    // Circular: há sempre cartões dos dois lados do central.
+    const offsetOf = (i: number) => {
+      const o = (((i - active) % n) + n) % n;
+      return o > Math.floor(n / 2) ? o - n : o;
+    };
+
+    const render = () => {
+      slides.forEach((slide, i) => {
+        const o = offsetOf(i);
+        const a = Math.min(Math.abs(o), LAYOUT.length - 1);
+        const sign = Math.sign(o);
+        const [tx, s, ry] = LAYOUT[a];
+        // um cartão que dá a volta de um lado para o outro muda sem animação, para não atravessar o carrossel
+        const before = offsets.get(slide);
+        slide.classList.toggle('is-jump', before !== undefined && Math.abs(before - o) > 1);
+        offsets.set(slide, o);
+        slide.style.setProperty('--tx', `${sign * tx}%`);
+        slide.style.setProperty('--s', String(s));
+        slide.style.setProperty('--ry', `${-sign * ry}deg`);
+        slide.style.zIndex = String(10 - a);
+        slide.classList.toggle('is-active', o === 0);
+        slide.classList.toggle('is-hidden', Math.abs(o) >= LAYOUT.length - 1);
+      });
+      dots.forEach((dot, i) => dot.setAttribute('aria-current', String(i === active)));
+    };
+
+    const goTo = (index: number, announce = true) => {
+      const focusInside = track.contains(document.activeElement);
+      active = (index + n) % n;
+      render();
+      if (focusInside) slides[active].querySelector<HTMLElement>('.title a')?.focus({ preventScroll: true });
+      if (announce) {
+        const title = slides[active].querySelector('.title')?.textContent ?? '';
+        status.textContent = `${active + 1} ${root.dataset.of} ${n}: ${title}`;
+      }
+    };
+
+    root.classList.add('is-enhanced');
+    prev.hidden = false;
+    next.hidden = false;
+    dotsBox.hidden = false;
+    goTo(0, false);
+
+    prev.addEventListener('click', () => goTo(active - 1));
+    next.addEventListener('click', () => goTo(active + 1));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+    root.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') { event.preventDefault(); goTo(active - 1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); goTo(active + 1); }
+    });
+
+    // Deslizar (toque ou rato): mais de 40px muda de cartão; o scroll vertical da página continua livre.
+    let startX = 0;
+    let startY = 0;
+    let swiped = false;
+    track.addEventListener('pointerdown', (event) => {
+      startX = event.clientX;
+      startY = event.clientY;
+      swiped = false;
+    });
+    track.addEventListener('pointerup', (event) => {
+      const dx = event.clientX - startX;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(event.clientY - startY)) {
+        swiped = true;
+        goTo(active + (dx < 0 ? 1 : -1));
+      }
+    });
+    track.addEventListener('dragstart', (event) => event.preventDefault());
+
+    // Clicar num cartão lateral traz esse cartão para o centro; depois de deslizar, o clique é ignorado.
+    track.addEventListener('click', (event) => {
+      if (swiped) {
+        event.preventDefault();
+        swiped = false;
+        return;
+      }
+      const slide = (event.target as HTMLElement).closest<HTMLElement>('[data-slide]');
+      if (slide && !slide.classList.contains('is-active')) {
+        event.preventDefault();
+        goTo(slides.indexOf(slide));
+      }
+    });
+  }
+</script>
+
+<style>
+  .coverflow {
+    --w: min(46rem, 80vw);
+    --h: calc(var(--w) * 1.1);
+    position: relative;
+    overflow-x: clip;
+  }
+  @media (min-width: 40rem) { .coverflow { --h: calc(var(--w) * 0.64); } }
+
+  /* sem JavaScript: faixa com scroll nativo */
+  .track {
+    display: flex;
+    gap: var(--space-4);
+    margin: 0;
+    padding: var(--space-5) var(--gutter);
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .slide { flex: 0 0 var(--w); height: var(--h); scroll-snap-align: center; }
+
+  /* com JavaScript: palco 3D */
+  .is-enhanced .track {
+    position: relative;
+    display: block;
+    height: calc(var(--h) + 2 * var(--space-5));
+    padding: 0;
+    overflow: visible;
+    touch-action: pan-y;
+    user-select: none;
+  }
+  .is-enhanced .slide {
+    position: absolute;
+    top: var(--space-5);
+    left: 50%;
+    width: var(--w);
+    transform: translateX(calc(-50% + var(--tx, 0%))) perspective(1400px) rotateY(var(--ry, 0deg)) scale(var(--s, 1));
+    transition: transform 600ms var(--ease), opacity 400ms var(--ease);
+    cursor: pointer;
+  }
+  .is-enhanced .slide.is-active { cursor: auto; }
+  .is-enhanced .slide.is-hidden { opacity: 0; pointer-events: none; }
+  .is-enhanced .slide.is-jump { transition: none; }
+
+  .cf-card {
+    position: relative;
+    height: 100%;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #141518;
+    color: #fff;
+    box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.5);
+  }
+  .cf-card :global(.cover) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  /* gradiente para o texto e véu escuro nos cartões laterais */
+  .cf-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.85), rgb(0 0 0 / 0.4) 45%, transparent 75%);
+  }
+  .cf-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.5);
+    opacity: 0;
+    transition: opacity 400ms var(--ease);
+    pointer-events: none;
+  }
+  .is-enhanced .slide:not(.is-active) .cf-card::after { opacity: 1; }
+
+  .info {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 1;
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    transition: opacity 300ms var(--ease), visibility 300ms;
+  }
+  /* nos laterais o texto some (e o link sai da ordem do teclado) */
+  .is-enhanced .slide:not(.is-active) .info { opacity: 0; visibility: hidden; }
+  .year { font: 400 var(--step--1)/1 var(--font-mono); letter-spacing: 0.06em; color: rgb(255 255 255 / 0.85); }
+  .title {
+    font-size: clamp(1.75rem, 1rem + 3vw, 3rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+  .title a { color: #fff; text-decoration: none; }
+  /* todo o cartão central é clicável, com um só link */
+  .title a::after { content: ""; position: absolute; inset: 0; z-index: 2; }
+  .title a:focus-visible { outline: none; }
+  .cf-card:has(.title a:focus-visible) { outline: 3px solid var(--mint); outline-offset: 4px; }
+  .summary { display: none; max-width: 52ch; color: rgb(255 255 255 / 0.82); font-size: var(--step--1); }
+  .pills { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: var(--space-2) 0 0; padding: 0; }
+  .pills li {
+    padding: 0.4rem 0.85rem;
+    border: 1px solid rgb(255 255 255 / 0.35);
+    border-radius: var(--radius-pill);
+    background: rgb(255 255 255 / 0.1);
+    font: 600 0.8125rem/1 var(--font-body);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  @media (min-width: 52rem) {
+    .summary { display: block; }
+  }
+
+  .arrow {
+    position: absolute;
+    top: calc(var(--space-5) + var(--h) / 2);
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-top: -1.75rem;
+    border: 1px solid rgb(255 255 255 / 0.2);
+    border-radius: 50%;
+    background: rgb(20 21 24 / 0.75);
+    color: #fff;
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    transition: background var(--dur-2) var(--ease), transform var(--dur-2) var(--ease);
+  }
+  .arrow:hover { background: #141518; transform: scale(1.06); }
+  .arrow:focus-visible { outline-color: var(--focus); }
+  .arrow[hidden] { display: none; }
+  .arrow--prev { left: max(var(--space-3), calc(50% - var(--w) / 2 - 7rem)); }
+  .arrow--next { right: max(var(--space-3), calc(50% - var(--w) / 2 - 7rem)); }
+
+  .dots { display: flex; justify-content: center; gap: var(--space-1); margin-top: var(--space-4); }
+  .dots[hidden] { display: none; }
+  /* alvo de 24px, ponto visível mais pequeno */
+  .dot {
+    display: grid;
+    place-items: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .dot::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--muted);
+    transition: width var(--dur-3) var(--ease), background var(--dur-3) var(--ease);
+  }
+  .dot[aria-current="true"] { min-width: 40px; }
+  .dot[aria-current="true"]::before { width: 32px; background: var(--accent-text); }
+</style>
