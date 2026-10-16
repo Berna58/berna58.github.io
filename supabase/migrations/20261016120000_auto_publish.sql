@@ -93,11 +93,9 @@ begin
     return;
   end if;
 
+  -- Sem Deploy Hook (ambiente local, ou produção ainda por configurar): fica pendente; o painel mostra-o.
   select ds.decrypted_secret into hook from vault.decrypted_secrets ds where ds.name = 'vercel_deploy_hook_url';
   if coalesce(hook, '') = '' then
-    update public.site_sync
-      set last_error = 'A publicação automática ainda não está configurada (falta o Deploy Hook no Vault).'
-      where id = 1;
     return;
   end if;
 
@@ -126,6 +124,7 @@ begin
   end if;
   select * into s from public.site_sync where id = 1;
   return jsonb_build_object(
+    'configured', exists (select 1 from vault.secrets v where v.name = 'vercel_deploy_hook_url'),
     'pending', s.request_id is null and public.published_content_hash() is distinct from s.deployed_hash,
     'requestedAt', s.requested_at,
     'error', s.last_error

@@ -286,6 +286,8 @@ function SiteStatus() {
   if (sync?.error) {
     label = `${sync.error} O site anterior continua online.`;
     tone = 'fail';
+  } else if (sync && !sync.configured) {
+    label = 'As alterações ficam guardadas, mas a publicação automática não está ligada aqui (falta o Deploy Hook no Vault).';
   } else if (sync?.pending) {
     label = 'Alterações guardadas. O site atualiza-se sozinho dentro de 1 a 3 minutos.';
     tone = 'progress';

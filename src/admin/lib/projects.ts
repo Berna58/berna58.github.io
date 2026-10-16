@@ -348,6 +348,7 @@ export const buildStatus = (): Promise<BuildState> => callFunction('build-status
 
 /** Publicação automática (job site_sync na base de dados): alterações por enviar, último pedido e erro. */
 export interface SyncState {
+  configured: boolean;
   pending: boolean;
   requestedAt: string | null;
   error: string | null;
